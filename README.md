@@ -1,3 +1,2 @@
 # Vizsgaremek
-Mészáros Nándor és Naményi Dominik vizsgaremeke
-
+Mészáros Nándor és Naményi Dominik vizsgaremeke.
