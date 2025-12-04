@@ -20,8 +20,12 @@ SET time_zone = "+00:00";
 --
 -- Adatbázis: `namero1`
 --
+CREATE DATABASE IF NOT EXISTS `namero1` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `namero1`;
 
+--
 -- --------------------------------------------------------
+--
 
 --
 -- Tábla szerkezet ehhez a táblához `belongs`
