@@ -1,0 +1,37 @@
+.footer {
+  width: 100%;
+  margin-top: auto;
+}
+
+.footer-top {
+  background-color: #667575;
+  display: flex;
+  justify-content: space-around;
+  padding: 60px 40px;
+  color: white;
+}
+
+.footer-col h3 {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.footer-col p {
+  font-size: 16px;
+  margin: 2px 0;
+}
+
+.footer-bottom {
+  background-color: #0f3d52;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  padding: 0 60px;
+  position: relative;
+}
+
+.footer-logo {
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+}
