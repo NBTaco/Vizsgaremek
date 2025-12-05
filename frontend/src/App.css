@@ -12,3 +12,10 @@ html, body, #root {
   flex: 1;
   background-color: #e3c36b;
 }
+
+.welcome {
+  text-align: center;
+  margin-top: 20px;
+  font-family: 'Arial', sans-serif;
+  color: #333;
+}

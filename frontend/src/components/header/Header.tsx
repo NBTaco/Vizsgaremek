@@ -24,6 +24,8 @@ function Header() {
             <a href="#">Profil</a>
             <a href="#">Beállítások</a>
             <a href="#">Kijelentkezés</a>
+            <a href="#">Bejelentkezés</a>
+            <a href="#">Regisztráció</a>
           </div>
         )}
       </div>
