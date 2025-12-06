@@ -12,7 +12,7 @@ const config: any = {
     jwtSecret: process.env.JWT_SECRET,
     database: new DBConfig(),
     maxSize: parseInt(process.env.MAX_FILE_SIZE ?? "2097152"),
-    baseDir:     path.win32.resolve(__dirname,"../../"),
+    baseDir: path.win32.resolve(__dirname,"../../"),
     uploadDir: process.env.UPLOAD_DIR_NAME ?? "/uploads/"
 
 }
