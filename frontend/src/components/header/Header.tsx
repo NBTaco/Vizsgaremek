@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./header.css";
 
-function Header() {
+function Header({ onLoginClick }: any) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -24,7 +24,7 @@ function Header() {
             <a href="#">Profil</a>
             <a href="#">Beállítások</a>
             <a href="#">Kijelentkezés</a>
-            <a href="#">Bejelentkezés</a>
+            <a href="#" onClick={onLoginClick}>Bejelentkezés</a>
             <a href="#">Regisztráció</a>
           </div>
         )}
