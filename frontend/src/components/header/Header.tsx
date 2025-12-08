@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./header.css";
 
-function Header({ onLoginClick }: any) {
+function Header({ onLoginClick,user, onLogout }: any) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -21,11 +21,20 @@ function Header({ onLoginClick }: any) {
 
         {open && (
           <div className="dropdown">
-            <a href="#">Profil</a>
+            {user && (
+              <>
+                <a href="#">Profil ({user.username})</a>
+                <a href="#" onClick={onLogout}>Kijelentkezés</a>
+              </>
+            )}
+            {!user && (
+              <>
+                <a href="#" onClick={onLoginClick}>Bejelentkezés</a>
+                <a href="#">Regisztráció</a>
+              </>
+            )}
             <a href="#">Beállítások</a>
-            <a href="#">Kijelentkezés</a>
-            <a href="#" onClick={onLoginClick}>Bejelentkezés</a>
-            <a href="#">Regisztráció</a>
+
           </div>
         )}
       </div>

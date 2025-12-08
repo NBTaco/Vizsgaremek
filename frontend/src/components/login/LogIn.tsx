@@ -2,7 +2,7 @@ import "./login.css";
 import users from "../testdata";
 import { useState } from "react";
 
-const LogIn = ({ onClose } : any) => {
+const LogIn = ({ onClose, onLoginSuccess }: any) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -12,7 +12,7 @@ const LogIn = ({ onClose } : any) => {
     );
 
     if (userFound) {
-      alert("Sikeres bejelentkezés!");
+      onLoginSuccess(userFound)
       console.log("Belépett felhasználó:", userFound);
     } else {
       alert("Hibás email vagy jelszó!");
