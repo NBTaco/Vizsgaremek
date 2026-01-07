@@ -66,7 +66,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loginUser = exports.registerUser = exports.run = void 0;
+exports.getMe = exports.loginUser = exports.registerUser = exports.run = void 0;
 var bcrypt_1 = __importDefault(require("bcrypt"));
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var promise_1 = __importDefault(require("mysql2/promise"));
@@ -219,3 +219,22 @@ var loginUser = function (req, res) { return __awaiter(void 0, void 0, void 0, f
     });
 }); };
 exports.loginUser = loginUser;
+var getMe = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var user;
+    return __generator(this, function (_a) {
+        try {
+            user = req.user;
+            if (!user) {
+                res.status(401).json({ success: false, message: "Unauthorized" });
+                return [2 /*return*/];
+            }
+            res.json({ success: true, user: { id: user.id, email: user.email } });
+        }
+        catch (error) {
+            console.error("getMe error:", error);
+            res.status(500).json({ success: false, message: "Internal server error" });
+        }
+        return [2 /*return*/];
+    });
+}); };
+exports.getMe = getMe;
