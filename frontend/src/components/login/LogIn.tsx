@@ -1,24 +1,41 @@
 import "./login.css";
-import users from "../testdata";
 import { useState } from "react";
 
 const LogIn = ({ onClose, onLoginSuccess }: any) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const LogInSuccess = () => {
-    const userFound = users.find(
-      user => user.email === email && user.password === password
-    );
+  const LogInSuccess = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email,
+          password
+        })  
+      });
 
-    if (userFound) {
-      onLoginSuccess(userFound)
-      console.log("Belépett felhasználó:", userFound);
-    } else {
-      alert("Hibás email vagy jelszó!");
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.message || "Sikertelen bejelentkezés");
+        return;
+      }
+
+      console.log("Sikeres login:", data);
+
+      localStorage.setItem("token", data.token);
+
+      onLoginSuccess(data.user);
+      onClose();
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("Szerver hiba");
     }
   };
-
   return (
     <div className="login-modal">
         <div className="login-box">
@@ -37,5 +54,6 @@ const LogIn = ({ onClose, onLoginSuccess }: any) => {
     </div>
   );
 };
+
 
 export default LogIn;
