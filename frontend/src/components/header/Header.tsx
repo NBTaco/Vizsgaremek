@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./header.css";
 
-function Header({ onLoginClick,user, onLogout }: any) {
+function Header({ onLoginClick,user, onLogout, onRegistrationClick}: any) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -30,7 +30,7 @@ function Header({ onLoginClick,user, onLogout }: any) {
             {!user && (
               <>
                 <a href="#" onClick={onLoginClick}>Bejelentkezés</a>
-                <a href="#">Regisztráció</a>
+                <a href="#" onClick={onRegistrationClick}>Regisztráció</a>
               </>
             )}
             <a href="#">Beállítások</a>

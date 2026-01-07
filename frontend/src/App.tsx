@@ -3,12 +3,14 @@ import Footer from './components/footer/Footer'
 import HomeCategories from './components/homecategories/HomeCategories'
 import LogIn from './components/login/LogIn'
 import { useState, useEffect } from 'react'
+import Registration from './components/registration/Registration'
 
 import './App.css'
 
 function App() {
   const [showLogin, setShowLogin] = useState(false)
   const [loggedInUser, setLoggedInUser] = useState<any>(null)
+  const [showRegistration, setShowRegistration] = useState(false)
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user")
@@ -28,12 +30,19 @@ function App() {
     localStorage.removeItem("user") 
   }
 
+  const handleRegistrationSuccess = (user: any) => {
+    setLoggedInUser(user);
+    localStorage.setItem("user", JSON.stringify(user));
+    setShowRegistration(false);
+  }
+
   return (
     <>
       <Header 
         onLoginClick={() => setShowLogin(true)} 
         user={loggedInUser}
         onLogout={handleLogout}
+        onRegistrationClick={() => setShowRegistration(true)}
       />
 
       <main className="main-content">
@@ -44,6 +53,12 @@ function App() {
           <LogIn 
             onClose={() => setShowLogin(false)} 
             onLoginSuccess={handleLoginSuccess}
+          />
+        )}
+        {showRegistration && (
+          <Registration
+            onClose={() => setShowRegistration(false)}
+            onRegistrationSuccess={handleRegistrationSuccess}
           />
         )}
       </main>
