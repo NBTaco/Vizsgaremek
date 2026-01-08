@@ -1,69 +1,18 @@
-import Header from './components/header/Header'
-import Footer from './components/footer/Footer'
-import HomeCategories from './components/homecategories/HomeCategories'
-import LogIn from './components/login/LogIn'
-import { useState, useEffect } from 'react'
-import Registration from './components/registration/Registration'
-
+import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import './App.css'
+import MainPage from './components/mainPage/mainpage';
+import Aboutus from './components/aboutus/aboutus';
+
+const router = createBrowserRouter([
+  { path: '/', element: <MainPage /> },
+  { path: '/aboutus', element: <Aboutus />},
+  { path: '/ujadat', element: ""} ,
+]);
 
 function App() {
-  const [showLogin, setShowLogin] = useState(false)
-  const [loggedInUser, setLoggedInUser] = useState<any>(null)
-  const [showRegistration, setShowRegistration] = useState(false)
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user")
-    if (storedUser) {
-      setLoggedInUser(JSON.parse(storedUser))
-    }
-  }, [])
-
-  const handleLoginSuccess = (user: any) => {
-    setLoggedInUser(user)
-    localStorage.setItem("user", JSON.stringify(user)) 
-    setShowLogin(false)
-  }
-
-  const handleLogout = () => {
-    setLoggedInUser(null)
-    localStorage.removeItem("user") 
-  }
-
-  const handleRegistrationSuccess = (user: any) => {
-    setLoggedInUser(user);
-    localStorage.setItem("user", JSON.stringify(user));
-    setShowRegistration(false);
-  }
-
   return (
     <>
-      <Header 
-        onLoginClick={() => setShowLogin(true)} 
-        user={loggedInUser}
-        onLogout={handleLogout}
-        onRegistrationClick={() => setShowRegistration(true)}
-      />
-
-      <main className="main-content">
-        <h1 className='welcome'>Üdvözlünk a weboldalon!</h1>
-        <HomeCategories />
-
-        {showLogin && (
-          <LogIn 
-            onClose={() => setShowLogin(false)} 
-            onLoginSuccess={handleLoginSuccess}
-          />
-        )}
-        {showRegistration && (
-          <Registration
-            onClose={() => setShowRegistration(false)}
-            onRegistrationSuccess={handleRegistrationSuccess}
-          />
-        )}
-      </main>
-
-      <Footer />
+      <RouterProvider router={router} />
     </>
   )
 }
