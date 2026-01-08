@@ -30,7 +30,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       });
       return;
     }
-    const [existingUser] = await connection.query("SELECT email FROM users WHERE email = ?", [email]);
+    const [existingUser] = await connection.query("SELECT email FROM users WHERE email = ? OR username = ?", [email, username]);
     if (Array.isArray(existingUser) && existingUser.length > 0) {
       res.status(409).json({
         success: false,
@@ -137,6 +137,132 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const userSettings = async (req: Request, res: Response) => {
-  
-}
+export const userSettings = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const connection = await mysql.createConnection(config.database);
+
+    const token = req.body?.token || req.query?.token || req.headers?.['x-access-token'];
+    if (!token) {
+      res.status(403).json({ success: false, message: "Token required" });
+      await connection.end();
+      return;
+    }
+
+    if (!config.jwtSecret) {
+      res.status(500).json({ success: false, message: "Missing JWT secret" });
+      await connection.end();
+      return;
+    }
+
+    let decoded: any;
+    try {
+      decoded = jwt.verify(token as string, config.jwtSecret) as any;
+    } catch (e) {
+      res.status(401).json({ success: false, message: "Invalid token" });
+      await connection.end();
+      return;
+    }
+
+    const userId = decoded?.id;
+    const email = decoded?.email;
+
+    const [users] = await connection.query(
+      "SELECT user_id, email, username FROM users WHERE user_id = ? OR email = ? LIMIT 1",
+      [userId, email]
+    );
+
+    const user = Array.isArray(users) && users.length > 0 ? users[0] as any : null;
+
+    if (!user) {
+      res.status(404).json({ success: false, message: "User not found" });
+      await connection.end();
+      return;
+    }
+
+    res.json({
+      success: true,
+      message: "User settings fetched",
+      user: { email: user.email, username: user.username },
+    });
+
+    await connection.end();
+  } catch (error) {
+    console.error("User settings error:", error);
+    res.status(500).json({ success: false, message: "Internal server error", error: (error as any).message });
+  }
+};
+
+
+export const getItemsByCategories = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const connection = await mysql.createConnection(config.database);
+
+    const categoryIdParam = req.query?.category_ids || req.body?.category_ids;
+    let categoryIds: number[] = [];
+
+    if (categoryIdParam) {
+      if (typeof categoryIdParam === "string") {
+        categoryIds = categoryIdParam.split(",").map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      } else if (Array.isArray(categoryIdParam)) {
+        categoryIds = (categoryIdParam as any[]).map(s => parseInt(String(s).trim(), 10)).filter(n => !isNaN(n));
+      } else if (typeof categoryIdParam === "number") {
+        categoryIds = [categoryIdParam as number];
+      }
+
+      if (categoryIdParam && categoryIds.length === 0) {
+        res.status(400).json({ success: false, message: "Invalid category_ids parameter" });
+        await connection.end();
+        return;
+      }
+    }
+
+    const categoryNameParam = req.query?.category_names || req.body?.category_names || req.query?.category || req.body?.category;
+    let categoryNames: string[] = [];
+
+    if (categoryNameParam) {
+      if (typeof categoryNameParam === "string") {
+        categoryNames = categoryNameParam.split(",").map(s => s.trim()).filter(s => s.length > 0);
+      } else if (Array.isArray(categoryNameParam)) {
+        categoryNames = (categoryNameParam as any[]).map(s => String(s).trim()).filter(s => s.length > 0);
+      } else {
+        categoryNames = [String(categoryNameParam).trim()].filter(s => s.length > 0);
+      }
+
+      if (categoryNameParam && categoryNames.length === 0) {
+        res.status(400).json({ success: false, message: "Invalid category_names parameter" });
+        await connection.end();
+        return;
+      }
+    }
+
+    let query = "SELECT p.product_id, p.product_name, p.price, p.stock, p.image_url FROM products p";
+    const whereClauses: string[] = [];
+    const params: any[] = [];
+
+    if (categoryIds.length > 0 || categoryNames.length > 0) {
+      query += " JOIN belongs b ON p.product_id = b.product_id JOIN categories c ON b.category_id = c.category_id";
+
+      if (categoryIds.length > 0) {
+        whereClauses.push("b.category_id IN (" + categoryIds.map(() => "?").join(",") + ")");
+        params.push(...categoryIds);
+      }
+
+      if (categoryNames.length > 0) {
+        whereClauses.push("c.name IN (" + categoryNames.map(() => "?").join(",") + ")");
+        params.push(...categoryNames);
+      }
+
+      query += " WHERE (" + whereClauses.join(" OR ") + ") GROUP BY p.product_id";
+    }
+
+    const [rows] = await connection.query(query, params);
+    const items = Array.isArray(rows) ? rows : [];
+
+    res.json({ success: true, items });
+
+    await connection.end();
+  } catch (error) {
+    console.error("Get items error:", error);
+    res.status(500).json({ success: false, message: "Internal server error", error: (error as any).message });
+  }
+};
