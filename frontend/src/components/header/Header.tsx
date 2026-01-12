@@ -10,8 +10,8 @@ function Header({ onLoginClick,user, onLogout, onRegistrationClick}: any) {
       <div className="logo"><Link to="/">NAMERO.1</Link></div>
 
       <nav className="nav">
-        <a href="#">Termékek</a>
-        <a href="#">Kapcsolat</a>
+        <Link to="/products">Termékek</Link>
+        <Link to="/contact">Kapcsolat</Link>
         <Link to="/aboutus">Rólunk</Link>
       </nav>
 
