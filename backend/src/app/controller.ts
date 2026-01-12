@@ -266,3 +266,22 @@ export const getItemsByCategories = async (req: Request, res: Response): Promise
     res.status(500).json({ success: false, message: "Internal server error", error: (error as any).message });
   }
 };
+
+export const getCategories = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const connection = await mysql.createConnection(config.database);
+
+    const [rows] = await connection.query(
+      "SELECT category_id, name FROM categories ORDER BY name ASC"
+    );
+
+    const categories = Array.isArray(rows) ? rows : [];
+
+    res.json({ success: true, categories });
+
+    await connection.end();
+  } catch (error) {
+    console.error("Get categories error:", error);
+    res.status(500).json({ success: false, message: "Internal server error", error: (error as any).message });
+  }
+};
