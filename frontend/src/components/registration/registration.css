@@ -5,7 +5,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 999;
+  z-index: 1000;
 }
 
 .registration-box {
@@ -13,10 +13,11 @@
   background: #c2c2c2;
   border-radius: 10px;
   overflow: hidden;
+  padding: 20px;
 }
 
 .registration-header {
-  background: #d9d9d9;
+  background: #3e3e3e;
   padding: 12px;
   text-align: center;
   font-weight: bold;
@@ -40,6 +41,8 @@
   border-radius: 8px;
   border: none;
   font-size: 14px;
+  box-sizing: border-box;
+  background-color: #747474;
 }
 
 .registration-btn {
