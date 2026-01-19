@@ -258,7 +258,7 @@ export const getItemsByCategories = async (req: Request, res: Response): Promise
     const [rows] = await connection.query(query, params);
     const items = Array.isArray(rows) ? rows : [];
 
-    res.json({ success: true, items });
+    res.json({ items });
 
     await connection.end();
   } catch (error) {
@@ -277,11 +277,11 @@ export const getCategories = async (_req: Request, res: Response): Promise<void>
 
     const categories = Array.isArray(rows) ? rows : [];
 
-    res.json({ success: true, categories });
+    res.json(categories);
 
     await connection.end();
   } catch (error) {
     console.error("Get categories error:", error);
-    res.status(500).json({ success: false, message: "Internal server error", error: (error as any).message });
+    res.status(500).json({ message: "Internal server error", error: (error as any).message });
   }
 };
