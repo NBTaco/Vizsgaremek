@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import mysql from "mysql2/promise";
 import config from "../config/config";
+import { connect } from "http2";
 
 const SALT_ROUNDS = 10;
 
@@ -285,3 +286,16 @@ export const getCategories = async (_req: Request, res: Response): Promise<void>
     res.status(500).json({ message: "Internal server error", error: (error as any).message });
   }
 };
+
+
+export const getUserRole = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const nev = req.params.username
+    const connection = await mysql.createConnection(config.database);
+    const [role] : any = await connection.query("SELECT users.role FROM users WHERE users.username = ?", [nev])
+    res.send(role[0])
+  }
+  catch(e){
+    console.error(e)
+  }
+}

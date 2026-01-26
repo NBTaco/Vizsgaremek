@@ -3,12 +3,13 @@ import Footer from "../footer/Footer";
 import Title from "../title/title";
 import Product from "../product/product";
 import { useEffect, useState } from "react";
-
+  
 export default function Products() {
   const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    async function GetProducts() {
+    async function getCategories() {
       try {
         const response = await fetch("http://localhost:3000/categories");
         const resData = await response.json();
@@ -17,10 +18,24 @@ export default function Products() {
         console.log("Lekérdezési hiba:");
       }
     }
-    GetProducts();
+    getCategories();
   }, []);
 
-  console.log(categories);
+  useEffect(() => {
+    async function getProducts() {
+        try{
+          const response = await fetch("http://localhost:3000/items")
+          const resData = await response.json()
+          setProducts(resData.items)
+          console.log(resData.items[1].image_url)
+        }
+        catch(e){
+          console.log(`hiba: ${e}`)
+        }
+      }
+      getProducts();
+    }, [])
+;
 
   return (
     <>
@@ -40,8 +55,13 @@ export default function Products() {
           </select>
         </div>
         <div className="col-6">
-          <Product image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm5TVIo0GISXiQig8fH0SLz46LA5o62ejQqQ&s" name="naményi"/>
+          {products.map((p : any) => (
+            <Product key={p.product_id} image={p.image_url} name={p.product_name}/>
+          ))
+          }
         </div>
+
+        
       </div>
       <Footer />
     </>
