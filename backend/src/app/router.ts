@@ -9,7 +9,7 @@ router.get("/", run);
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.post("/user", userSettings, verifyToken);
-router.post("/items", getItemsByCategories);
+router.get("/items", getItemsByCategories);
 router.post("/aboutus", userSettings);
 router.get("/categories", getCategories)
 
