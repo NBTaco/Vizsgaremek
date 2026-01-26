@@ -9,16 +9,22 @@ function Header({ user }: any) {
   const [showLogin, setShowLogin] = useState(false);
   const [loggedInUser, setloggedInUser] = useState(user || null);
   const [showRegistration, setShowRegistration] = useState(false);
+  const [role, setRole] = useState("");
 
   const handleLoginSuccess = (user: any) => {
     setloggedInUser(user);
     localStorage.setItem("user", JSON.stringify(user));
     setShowLogin(false);
+    getRole()
   };
 
   const handleLogout = () => {
     setloggedInUser(null);
     localStorage.removeItem("user");
+    localStorage.removeItem("username");
+    localStorage.removeItem("role");
+    localStorage.removeItem("token");
+    setRole("")
   };
 
   const handleRegistrationSuccess = (user: any) => {
@@ -27,6 +33,13 @@ function Header({ user }: any) {
     setShowRegistration(false);
   };
 
+  async function getRole() {
+    const username = await localStorage.getItem('username')
+    const response = await fetch(`http://localhost:3000/role/${username}`)
+    const resdata : any = await response.json()
+    localStorage.setItem('role', resdata.role)
+    setRole(resdata.role)
+  }
 
   return (
     <header className="header">
@@ -36,6 +49,9 @@ function Header({ user }: any) {
         <Link to="/products">Termékek</Link>
         <Link to="/contact">Kapcsolat</Link>
         <Link to="/aboutus">Rólunk</Link>
+        {role == "admin" && 
+          <Link to="/adminmain">ASD</Link>
+        }
       </nav>
 
       <div className="menu-container">

@@ -20,6 +20,7 @@ const LogIn = ({ onClose, onLoginSuccess }: any) => {
 
       const data = await response.json();
 
+
       if (!response.ok) {
         alert(data.message || "Sikertelen bejelentkezés");
         return;
@@ -28,6 +29,7 @@ const LogIn = ({ onClose, onLoginSuccess }: any) => {
       console.log("Sikeres login:", data);
 
       localStorage.setItem("token", data.token);
+      localStorage.setItem("username", data.user.username)
 
       onLoginSuccess(data.user);
       onClose();
