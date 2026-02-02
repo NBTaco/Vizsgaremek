@@ -32,7 +32,9 @@
 }
 
 .menu-container {
-  position: relative;
+  position: relative; 
+  align-items: center;
+  justify-content: center;
 }
 
 .menu-btn {
@@ -46,14 +48,13 @@
 
 .dropdown {
   position: absolute;
-  top: 120%;
-  right: 0;
-  background: #e6e6e6;
+  margin-top: 100px; 
+  background: #b8b7b7;
   width: 160px;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  z-index: 999;
 }
 
 .dropdown a {

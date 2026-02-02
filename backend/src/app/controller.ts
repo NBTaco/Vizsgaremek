@@ -3,7 +3,6 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import mysql from "mysql2/promise";
 import config from "../config/config";
-import { connect } from "http2";
 
 const SALT_ROUNDS = 10;
 

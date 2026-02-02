@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./header.css";
 import { Link } from "react-router-dom";
 import LogIn from "../login/LogIn";
@@ -11,6 +11,19 @@ function Header({ user }: any) {
   const [showRegistration, setShowRegistration] = useState(false);
   const [role, setRole] = useState("");
 
+  useEffect(() => {
+  const storedUser = localStorage.getItem("user");
+  const storedRole = localStorage.getItem("role");
+
+  if (storedUser) {
+    setloggedInUser(JSON.parse(storedUser));
+  }
+
+  if (storedRole) {
+    setRole(storedRole);
+  }
+}, []);
+  
   const handleLoginSuccess = (user: any) => {
     setloggedInUser(user);
     localStorage.setItem("user", JSON.stringify(user));
@@ -50,7 +63,7 @@ function Header({ user }: any) {
         <Link to="/contact">Kapcsolat</Link>
         <Link to="/aboutus">Rólunk</Link>
         {role == "admin" && 
-          <Link to="/adminmain">ASD</Link>
+          <Link to="/adminmain">Admin-oldal</Link>
         }
       </nav>
 
@@ -74,6 +87,7 @@ function Header({ user }: any) {
               </>
             )}
             <a href="#">Beállítások</a>
+            <a href="#" onClick={() => setOpen(!open)}>Bezárás</a>
 
           </div>
         )}
