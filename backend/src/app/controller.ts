@@ -6,6 +6,14 @@ import config from "../config/config";
 
 const SALT_ROUNDS = 10;
 
+type UserRow = {
+  user_id: number;
+  email: string;
+  username: string;
+  role?: string;
+  password_hash?: string;
+};
+
 export const run = (_req: Request, res: Response) => {
   res.send("Server is running");
 };
@@ -46,11 +54,11 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       [email, hashedPassword, username || email.split("@")[0]]
     );
 
-    const [users] = await connection.query("SELECT user_id, email, username FROM users WHERE email = ?", [email]);
-    const user = Array.isArray(users) && users.length > 0 ? users[0] : null;
+    const [users] = await connection.query("SELECT user_id, email, username, role FROM users WHERE email = ?", [email]);
+    const user = Array.isArray(users) && users.length > 0 ? (users[0] as UserRow) : null;
 
     const token = jwt.sign(
-      { id: (result as any).insertId, email },
+      { id: (result as any).insertId, email, role: user?.role },
       config.jwtSecret || "your-secret-key",
       { expiresIn: "24h" }
     );
@@ -86,7 +94,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const [users] = await connection.query("SELECT user_id, email, password_hash, username FROM users WHERE email = ?", [
+    const [users] = await connection.query("SELECT user_id, email, password_hash, username, role FROM users WHERE email = ?", [
       email,
     ]);
 
@@ -113,7 +121,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
     }
 
     const token = jwt.sign(
-      { id: user.user_id, email: user.email },
+      { id: user.user_id, email: user.email, role: user.role },
       config.jwtSecret || "your-secret-key",
       { expiresIn: "24h" }
     );
@@ -264,6 +272,222 @@ export const getItemsByCategories = async (req: Request, res: Response): Promise
   } catch (error) {
     console.error("Get items error:", error);
     res.status(500).json({ success: false, message: "Internal server error", error: (error as any).message });
+  }
+};
+
+export const addItem = async (req: Request, res: Response): Promise<void> => {
+  let connection: mysql.Connection | null = null;
+  try {
+    connection = await mysql.createConnection(config.database);
+    const { product_name, price, stock, image_url, category_ids } = req.body;
+
+    if (!product_name || price === undefined || stock === undefined || !image_url) {
+      res.status(400).json({ success: false, message: "product_name, price, stock, image_url are required" });
+      await connection.end();
+      return;
+    }
+
+    const parsedPrice = Number(price);
+    const parsedStock = Number(stock);
+
+    if (!Number.isFinite(parsedPrice) || parsedPrice < 0 || !Number.isFinite(parsedStock) || parsedStock < 0) {
+      res.status(400).json({ success: false, message: "price and stock must be non-negative numbers" });
+      await connection.end();
+      return;
+    }
+
+    let categoryIds: number[] = [];
+    if (category_ids !== undefined) {
+      if (typeof category_ids === "string") {
+        categoryIds = category_ids.split(",").map((s: string) => parseInt(s.trim(), 10)).filter((n: number) => !isNaN(n));
+      } else if (Array.isArray(category_ids)) {
+        categoryIds = (category_ids as any[]).map((s) => parseInt(String(s).trim(), 10)).filter((n) => !isNaN(n));
+      } else if (typeof category_ids === "number") {
+        categoryIds = [category_ids as number];
+      }
+
+      if (category_ids !== undefined && categoryIds.length === 0) {
+        res.status(400).json({ success: false, message: "Invalid category_ids" });
+        await connection.end();
+        return;
+      }
+    }
+
+    await connection.beginTransaction();
+
+    const [result] = await connection.query(
+      "INSERT INTO products (product_name, price, stock, image_url) VALUES (?, ?, ?, ?)",
+      [product_name, parsedPrice, parsedStock, image_url]
+    );
+
+    const productId = (result as any).insertId;
+
+    if (categoryIds.length > 0) {
+      const values = categoryIds.map(() => "(?, ?)").join(", ");
+      const params: any[] = [];
+      categoryIds.forEach((categoryId) => {
+        params.push(categoryId, productId);
+      });
+      await connection.query(`INSERT INTO belongs (category_id, product_id) VALUES ${values}`, params);
+    }
+
+    await connection.commit();
+
+    res.status(201).json({
+      success: true,
+      message: "Item added successfully",
+      product_id: productId,
+    });
+  } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
+    console.error("Add item error:", error);
+    res.status(500).json({ success: false, message: "Internal server error", error: (error as any).message });
+  } finally {
+    if (connection) {
+      await connection.end();
+    }
+  }
+};
+
+export const updateItem = async (req: Request, res: Response): Promise<void> => {
+  let connection: mysql.Connection | null = null;
+  try {
+    connection = await mysql.createConnection(config.database);
+    const productId = Number(req.params.productId);
+    const { product_name, price, stock, image_url, category_ids } = req.body;
+
+    if (!Number.isFinite(productId) || productId <= 0) {
+      res.status(400).json({ success: false, message: "Invalid productId" });
+      return;
+    }
+
+    const updates: string[] = [];
+    const params: any[] = [];
+
+    if (product_name !== undefined) {
+      updates.push("product_name = ?");
+      params.push(product_name);
+    }
+
+    if (price !== undefined) {
+      const parsedPrice = Number(price);
+      if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+        res.status(400).json({ success: false, message: "price must be a non-negative number" });
+        return;
+      }
+      updates.push("price = ?");
+      params.push(parsedPrice);
+    }
+
+    if (stock !== undefined) {
+      const parsedStock = Number(stock);
+      if (!Number.isFinite(parsedStock) || parsedStock < 0) {
+        res.status(400).json({ success: false, message: "stock must be a non-negative number" });
+        return;
+      }
+      updates.push("stock = ?");
+      params.push(parsedStock);
+    }
+
+    if (image_url !== undefined) {
+      updates.push("image_url = ?");
+      params.push(image_url);
+    }
+
+    let categoryIds: number[] | null = null;
+    if (category_ids !== undefined) {
+      categoryIds = [];
+      if (typeof category_ids === "string") {
+        categoryIds = category_ids.split(",").map((s: string) => parseInt(s.trim(), 10)).filter((n: number) => !isNaN(n));
+      } else if (Array.isArray(category_ids)) {
+        categoryIds = (category_ids as any[]).map((s) => parseInt(String(s).trim(), 10)).filter((n) => !isNaN(n));
+      } else if (typeof category_ids === "number") {
+        categoryIds = [category_ids as number];
+      }
+
+      const isEmptyArray = Array.isArray(category_ids) && category_ids.length === 0;
+      if (categoryIds.length === 0 && !isEmptyArray) {
+        res.status(400).json({ success: false, message: "Invalid category_ids" });
+        return;
+      }
+    }
+
+    if (updates.length === 0 && categoryIds === null) {
+      res.status(400).json({ success: false, message: "No fields provided to update" });
+      return;
+    }
+
+    await connection.beginTransaction();
+
+    if (updates.length > 0) {
+      params.push(productId);
+      const [updateResult] = await connection.query(
+        `UPDATE products SET ${updates.join(", ")} WHERE product_id = ?`,
+        params
+      );
+
+      if ((updateResult as any).affectedRows === 0) {
+        await connection.rollback();
+        res.status(404).json({ success: false, message: "Item not found" });
+        return;
+      }
+    } else {
+      const [existingRows] = await connection.query(
+        "SELECT product_id FROM products WHERE product_id = ?",
+        [productId]
+      );
+      if (!Array.isArray(existingRows) || existingRows.length === 0) {
+        await connection.rollback();
+        res.status(404).json({ success: false, message: "Item not found" });
+        return;
+      }
+    }
+
+    if (categoryIds !== null) {
+      await connection.query("DELETE FROM belongs WHERE product_id = ?", [productId]);
+      if (categoryIds.length > 0) {
+        const values = categoryIds.map(() => "(?, ?)").join(", ");
+        const categoryParams: any[] = [];
+        categoryIds.forEach((categoryId) => {
+          categoryParams.push(categoryId, productId);
+        });
+        await connection.query(`INSERT INTO belongs (category_id, product_id) VALUES ${values}`, categoryParams);
+      }
+    }
+
+    await connection.commit();
+
+    const [itemRows] = await connection.query(
+      "SELECT product_id, product_name, price, stock, image_url FROM products WHERE product_id = ?",
+      [productId]
+    );
+    const item = Array.isArray(itemRows) && itemRows.length > 0 ? itemRows[0] : null;
+
+    const [categoryRows] = await connection.query(
+      "SELECT category_id FROM belongs WHERE product_id = ?",
+      [productId]
+    );
+    const categoryIdsResult = Array.isArray(categoryRows)
+      ? categoryRows.map((row: any) => row.category_id)
+      : [];
+
+    res.json({
+      success: true,
+      message: "Item updated successfully",
+      item: item ? { ...item, category_ids: categoryIdsResult } : null,
+    });
+  } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
+    console.error("Update item error:", error);
+    res.status(500).json({ success: false, message: "Internal server error", error: (error as any).message });
+  } finally {
+    if (connection) {
+      await connection.end();
+    }
   }
 };
 

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2025. Dec 04. 16:30
+-- Létrehozás ideje: 2026. Feb 05. 16:31
 -- Kiszolgáló verziója: 10.4.32-MariaDB
 -- PHP verzió: 8.2.12
 
@@ -20,12 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Adatbázis: `namero1`
 --
-CREATE DATABASE IF NOT EXISTS `namero1` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE `namero1`;
 
---
 -- --------------------------------------------------------
---
 
 --
 -- Tábla szerkezet ehhez a táblához `belongs`
@@ -35,6 +31,23 @@ CREATE TABLE `belongs` (
   `category_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- A tábla adatainak kiíratása `belongs`
+--
+
+INSERT INTO `belongs` (`category_id`, `product_id`) VALUES
+(2, 1),
+(2, 2),
+(1, 3),
+(2, 4),
+(2, 5),
+(1, 6),
+(2, 7),
+(2, 8),
+(1, 9),
+(1, 10),
+(1, 11);
 
 -- --------------------------------------------------------
 
@@ -46,6 +59,14 @@ CREATE TABLE `categories` (
   `category_id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- A tábla adatainak kiíratása `categories`
+--
+
+INSERT INTO `categories` (`category_id`, `name`) VALUES
+(1, 'power tools'),
+(2, 'simple tools');
 
 -- --------------------------------------------------------
 
@@ -88,6 +109,23 @@ CREATE TABLE `products` (
   `image_url` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- A tábla adatainak kiíratása `products`
+--
+
+INSERT INTO `products` (`product_id`, `product_name`, `price`, `stock`, `image_url`) VALUES
+(1, 'Bitfejkészlet', 6999, 2, '../kepek/1.png'),
+(2, 'Csavarhúzó', 6750, 6, '../kepek/2.png'),
+(3, 'Csavarozógép', 4500, 4, '../kepek/3.png'),
+(4, 'Gumikalapács', 3000, 5, '../kepek/4.png'),
+(5, 'Kalapács', 1500, 6, '../kepek/5.png'),
+(6, 'Korfűrész', 10000, 7, '../kepek/6.png'),
+(7, 'Pajszer', 12300, 8, '../kepek/7.png'),
+(8, 'Racsni', 7000, 3, '../kepek/8.png'),
+(9, 'Sarokcsiszoló', 6500, 2, '../kepek/9.png'),
+(10, 'Vésőgép', 5400, 4, '../kepek/10.png'),
+(11, 'Csiszológép', 12300, 1, '../kepek/11.png');
+
 -- --------------------------------------------------------
 
 --
@@ -101,6 +139,13 @@ CREATE TABLE `users` (
   `password_hash` varchar(255) DEFAULT NULL,
   `role` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- A tábla adatainak kiíratása `users`
+--
+
+INSERT INTO `users` (`user_id`, `username`, `email`, `password_hash`, `role`) VALUES
+(1, 'admin', 'admin@gmail.com', '$2a$10$ObQGeonWFnh1OjnBAtLk/eOnmqW4f04CM7.APuBNMXFy0jWT4fNIq', 'admin');
 
 --
 -- Indexek a kiírt táblákhoz
@@ -141,7 +186,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT a táblához `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT a táblához `orders`
@@ -153,13 +198,13 @@ ALTER TABLE `orders`
 -- AUTO_INCREMENT a táblához `products`
 --
 ALTER TABLE `products`
-  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT a táblához `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

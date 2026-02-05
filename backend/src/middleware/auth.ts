@@ -20,4 +20,13 @@ const verifyToken = (req:any,res:any,next:any) => {
     res.status(401).send("Az auth nem sikerült!")
 }
 
+const requireAdmin = (req: any, res: any, next: any) => {
+    const role = req.user?.role
+    if (role !== "admin") {
+        return res.status(403).send("Admin jogosultsag szukseges")
+    }
+    return next()
+}
+
+export { requireAdmin }
 export default verifyToken
