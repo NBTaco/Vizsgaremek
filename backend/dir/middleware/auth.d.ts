@@ -1,8 +1,4 @@
-import { Request, Response, NextFunction } from "express";
-export interface TokenPayload {
-    id: number;
-    email: string;
-    iat?: number;
-    exp?: number;
-}
-export declare const verifyToken: (req: Request, res: Response, next: NextFunction) => void;
+declare const verifyToken: (req: any, res: any, next: any) => any;
+declare const requireAdmin: (req: any, res: any, next: any) => any;
+export { requireAdmin };
+export default verifyToken;
