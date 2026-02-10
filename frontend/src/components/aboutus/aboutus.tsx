@@ -8,7 +8,7 @@ export default function Aboutus() {
     <>
       <Header />
       <Title titlemessage="Rólunk" />
-      <div className="card">
+      <div className="aboutus-card">
         <div className="top">
           <div className="image-container">
             <img src=""/>

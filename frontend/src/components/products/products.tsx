@@ -3,10 +3,29 @@ import Footer from "../footer/Footer";
 import Title from "../title/title";
 import Product from "../product/product";
 import { useEffect, useState } from "react";
+import {jwtDecode} from "jwt-decode";
   
 export default function Products() {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
+  const [role, setRole] = useState<string | null>(null);
+
+    useEffect(() => {
+      const token = localStorage.getItem("token");
+  
+      if (!token) {
+        setRole(null);
+        return;
+      }
+  
+      try {
+        const decoded = jwtDecode<{ role?: string }>(token);
+        setRole(decoded?.role ?? null);
+      } catch (err) {
+        console.error("Invalid token", err);
+        setRole(null);
+      }
+    }, []);
 
   useEffect(() => {
     async function getCategories() {
@@ -53,6 +72,11 @@ export default function Products() {
               <option key={e.category_id}>{e.name}</option>
             ))}
           </select>
+          {role === "admin" && (
+            <div>
+              <button >Kategória hozzáadása</button>
+            </div>
+          )}
         </div>
         <div className="col-6">
           {products.map((p : any) => (
