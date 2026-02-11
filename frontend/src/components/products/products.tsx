@@ -4,11 +4,13 @@ import Title from "../title/title";
 import Product from "../product/product";
 import { useEffect, useState } from "react";
 import {jwtDecode} from "jwt-decode";
+import EditCategories from "../addcategory/editcategories";
   
 export default function Products() {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [role, setRole] = useState<string | null>(null);
+  const [showEditCategories, setShowEditCategories] = useState(false);
 
     useEffect(() => {
       const token = localStorage.getItem("token");
@@ -27,7 +29,6 @@ export default function Products() {
       }
     }, []);
 
-  useEffect(() => {
     async function getCategories() {
       try {
         const response = await fetch("http://localhost:3000/categories");
@@ -37,8 +38,10 @@ export default function Products() {
         console.log("Lekérdezési hiba:");
       }
     }
-    getCategories();
-  }, []);
+    
+    useEffect(() => {
+      getCategories();
+    }, []);
 
   useEffect(() => {
     async function getProducts() {
@@ -74,7 +77,7 @@ export default function Products() {
           </select>
           {role === "admin" && (
             <div>
-              <button >Kategória hozzáadása</button>
+              <button onClick={() => setShowEditCategories(true)}>Kategóriák szerkesztése</button>
             </div>
           )}
         </div>
@@ -87,6 +90,14 @@ export default function Products() {
 
         
       </div>
+      {showEditCategories && (
+        <EditCategories
+          onClose={() => {
+            setShowEditCategories(false);
+            getCategories(); 
+          }}
+        />
+      )}
       <Footer />
     </>
   );

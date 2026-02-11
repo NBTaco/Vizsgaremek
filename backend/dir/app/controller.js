@@ -86,7 +86,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserRole = exports.getCategories = exports.updateItem = exports.addItem = exports.getItemsByCategories = exports.userSettings = exports.loginUser = exports.registerUser = exports.run = void 0;
+exports.getUserRole = exports.deleteCategory = exports.addCategory = exports.getCategories = exports.deleteItem = exports.updateItem = exports.addItem = exports.getItemsByCategories = exports.userSettings = exports.loginUser = exports.registerUser = exports.run = void 0;
 var bcrypt_1 = __importDefault(require("bcrypt"));
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var promise_1 = __importDefault(require("mysql2/promise"));
@@ -636,8 +636,75 @@ var updateItem = function (req, res) { return __awaiter(void 0, void 0, void 0, 
     });
 }); };
 exports.updateItem = updateItem;
+var deleteItem = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var connection, productId, _a, existingRows, error_7;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                connection = null;
+                _b.label = 1;
+            case 1:
+                _b.trys.push([1, 10, 13, 16]);
+                return [4 /*yield*/, promise_1.default.createConnection(config_1.default.database)];
+            case 2:
+                connection = _b.sent();
+                productId = Number(req.params.productId);
+                if (!Number.isFinite(productId) || productId <= 0) {
+                    res.status(400).json({ success: false, message: "Invalid productId" });
+                    return [2 /*return*/];
+                }
+                return [4 /*yield*/, connection.beginTransaction()];
+            case 3:
+                _b.sent();
+                return [4 /*yield*/, connection.query("SELECT product_id FROM products WHERE product_id = ?", [productId])];
+            case 4:
+                _a = __read.apply(void 0, [_b.sent(), 1]), existingRows = _a[0];
+                if (!(!Array.isArray(existingRows) || existingRows.length === 0)) return [3 /*break*/, 6];
+                return [4 /*yield*/, connection.rollback()];
+            case 5:
+                _b.sent();
+                res.status(404).json({ success: false, message: "Item not found" });
+                return [2 /*return*/];
+            case 6: return [4 /*yield*/, connection.query("DELETE FROM belongs WHERE product_id = ?", [productId])];
+            case 7:
+                _b.sent();
+                return [4 /*yield*/, connection.query("DELETE FROM products WHERE product_id = ?", [productId])];
+            case 8:
+                _b.sent();
+                return [4 /*yield*/, connection.commit()];
+            case 9:
+                _b.sent();
+                res.json({
+                    success: true,
+                    message: "Item deleted successfully",
+                    product_id: productId,
+                });
+                return [3 /*break*/, 16];
+            case 10:
+                error_7 = _b.sent();
+                if (!connection) return [3 /*break*/, 12];
+                return [4 /*yield*/, connection.rollback()];
+            case 11:
+                _b.sent();
+                _b.label = 12;
+            case 12:
+                console.error("Delete item error:", error_7);
+                res.status(500).json({ success: false, message: "Internal server error", error: error_7.message });
+                return [3 /*break*/, 16];
+            case 13:
+                if (!connection) return [3 /*break*/, 15];
+                return [4 /*yield*/, connection.end()];
+            case 14:
+                _b.sent();
+                _b.label = 15;
+            case 15: return [7 /*endfinally*/];
+            case 16: return [2 /*return*/];
+        }
+    });
+}); };
+exports.deleteItem = deleteItem;
 var getCategories = function (_req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var connection, _a, rows, categories, error_7;
+    var connection, _a, rows, categories, error_8;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -655,15 +722,135 @@ var getCategories = function (_req, res) { return __awaiter(void 0, void 0, void
                 _b.sent();
                 return [3 /*break*/, 5];
             case 4:
-                error_7 = _b.sent();
-                console.error("Get categories error:", error_7);
-                res.status(500).json({ message: "Internal server error", error: error_7.message });
+                error_8 = _b.sent();
+                console.error("Get categories error:", error_8);
+                res.status(500).json({ message: "Internal server error", error: error_8.message });
                 return [3 /*break*/, 5];
             case 5: return [2 /*return*/];
         }
     });
 }); };
 exports.getCategories = getCategories;
+var addCategory = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var connection, name, trimmedName, _a, existingCategories, _b, result, categoryId, error_9;
+    return __generator(this, function (_c) {
+        switch (_c.label) {
+            case 0:
+                connection = null;
+                _c.label = 1;
+            case 1:
+                _c.trys.push([1, 5, 6, 9]);
+                return [4 /*yield*/, promise_1.default.createConnection(config_1.default.database)];
+            case 2:
+                connection = _c.sent();
+                name = req.body.name;
+                if (!name || typeof name !== "string" || name.trim().length === 0) {
+                    res.status(400).json({ success: false, message: "Category name is required" });
+                    return [2 /*return*/];
+                }
+                trimmedName = name.trim();
+                return [4 /*yield*/, connection.query("SELECT category_id FROM categories WHERE name = ?", [trimmedName])];
+            case 3:
+                _a = __read.apply(void 0, [_c.sent(), 1]), existingCategories = _a[0];
+                if (Array.isArray(existingCategories) && existingCategories.length > 0) {
+                    res.status(409).json({ success: false, message: "Category already exists" });
+                    return [2 /*return*/];
+                }
+                return [4 /*yield*/, connection.query("INSERT INTO categories (name) VALUES (?)", [trimmedName])];
+            case 4:
+                _b = __read.apply(void 0, [_c.sent(), 1]), result = _b[0];
+                categoryId = result.insertId;
+                res.status(201).json({
+                    success: true,
+                    message: "Category added successfully",
+                    category_id: categoryId,
+                    name: trimmedName,
+                });
+                return [3 /*break*/, 9];
+            case 5:
+                error_9 = _c.sent();
+                console.error("Add category error:", error_9);
+                res.status(500).json({ success: false, message: "Internal server error", error: error_9.message });
+                return [3 /*break*/, 9];
+            case 6:
+                if (!connection) return [3 /*break*/, 8];
+                return [4 /*yield*/, connection.end()];
+            case 7:
+                _c.sent();
+                _c.label = 8;
+            case 8: return [7 /*endfinally*/];
+            case 9: return [2 /*return*/];
+        }
+    });
+}); };
+exports.addCategory = addCategory;
+var deleteCategory = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var connection, categoryId, _a, existingRows, error_10;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                connection = null;
+                _b.label = 1;
+            case 1:
+                _b.trys.push([1, 10, 13, 16]);
+                return [4 /*yield*/, promise_1.default.createConnection(config_1.default.database)];
+            case 2:
+                connection = _b.sent();
+                categoryId = Number(req.params.categoryId);
+                if (!Number.isFinite(categoryId) || categoryId <= 0) {
+                    res.status(400).json({ success: false, message: "Invalid categoryId" });
+                    return [2 /*return*/];
+                }
+                return [4 /*yield*/, connection.beginTransaction()];
+            case 3:
+                _b.sent();
+                return [4 /*yield*/, connection.query("SELECT category_id FROM categories WHERE category_id = ?", [categoryId])];
+            case 4:
+                _a = __read.apply(void 0, [_b.sent(), 1]), existingRows = _a[0];
+                if (!(!Array.isArray(existingRows) || existingRows.length === 0)) return [3 /*break*/, 6];
+                return [4 /*yield*/, connection.rollback()];
+            case 5:
+                _b.sent();
+                res.status(404).json({ success: false, message: "Category not found" });
+                return [2 /*return*/];
+            case 6: return [4 /*yield*/, connection.query("DELETE FROM belongs WHERE category_id = ?", [categoryId])];
+            case 7:
+                _b.sent();
+                return [4 /*yield*/, connection.query("DELETE FROM categories WHERE category_id = ?", [categoryId])];
+            case 8:
+                _b.sent();
+                return [4 /*yield*/, connection.commit()];
+            case 9:
+                _b.sent();
+                res.json({
+                    success: true,
+                    message: "Category deleted successfully",
+                    category_id: categoryId,
+                });
+                return [3 /*break*/, 16];
+            case 10:
+                error_10 = _b.sent();
+                if (!connection) return [3 /*break*/, 12];
+                return [4 /*yield*/, connection.rollback()];
+            case 11:
+                _b.sent();
+                _b.label = 12;
+            case 12:
+                console.error("Delete category error:", error_10);
+                res.status(500).json({ success: false, message: "Internal server error", error: error_10.message });
+                return [3 /*break*/, 16];
+            case 13:
+                if (!connection) return [3 /*break*/, 15];
+                return [4 /*yield*/, connection.end()];
+            case 14:
+                _b.sent();
+                _b.label = 15;
+            case 15: return [7 /*endfinally*/];
+            case 16: return [2 /*return*/];
+        }
+    });
+}); };
+exports.deleteCategory = deleteCategory;
 var getUserRole = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var nev, connection, _a, role, e_2;
     return __generator(this, function (_b) {

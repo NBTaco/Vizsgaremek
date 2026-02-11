@@ -19,6 +19,6 @@ router.post("/additem", addItem)
 router.post("/updateitem", updateItem)
 router.post("/deleteitem", deleteItem)
 router.post("/addcategory", addCategory)
-router.post("/deletecategory", deleteCategory)
+router.post("/deletecategory/:categoryId", deleteCategory)
 
 export default router;
