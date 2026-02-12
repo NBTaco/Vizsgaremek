@@ -49,7 +49,6 @@ export default function Products() {
           const response = await fetch("http://localhost:3000/items")
           const resData = await response.json()
           setProducts(resData.items)
-          console.log(resData.items[1].image_url)
         }
         catch(e){
           console.log(`hiba: ${e}`)

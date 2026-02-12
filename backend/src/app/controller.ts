@@ -265,8 +265,20 @@ export const getItemsByCategories = async (req: Request, res: Response): Promise
 
     const [rows] = await connection.query(query, params);
     const items = Array.isArray(rows) ? rows : [];
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
 
-    res.json({ items });
+    const normalizedItems = items.map((item: any) => {
+      let imageUrl = item?.image_url || "";
+      
+      if (!imageUrl.startsWith("http")) {
+        imageUrl = imageUrl.replace(/^\.\.\//, "").replace(/^kepek\//, "");
+        imageUrl = `${baseUrl}/kepek/${imageUrl}`;
+      }
+
+      return { ...item, image_url: imageUrl };
+    });
+
+    res.json({ items: normalizedItems });
 
     await connection.end();
   } catch (error) {
