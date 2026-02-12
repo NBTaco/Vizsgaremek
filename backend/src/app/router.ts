@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addCategory, addItem, deleteCategory, deleteItem, getCategories, getItemsByCategories, getUserRole, loginUser, registerUser, run, updateItem, userSettings } from "./controller";
+import { addCategory, addItem, addToCart, createOrder, deleteCartItem, deleteCategory, deleteItem, getCategories, getItemsByCategories, getUserRole, loginUser, registerUser, run, updateCartItem, updateItem, updateOrderStatus, userSettings } from "./controller";
 import verifyToken, { requireAdmin } from "../middleware/auth"
 
 const router = Router();
@@ -20,5 +20,10 @@ router.post("/updateitem", updateItem)
 router.post("/deleteitem", deleteItem)
 router.post("/addcategory", addCategory)
 router.post("/deletecategory/:categoryId", deleteCategory)
+router.post("/orders", verifyToken, createOrder)
+router.post("/cart/items", verifyToken, addToCart)
+router.patch("/cart/items", verifyToken, updateCartItem)
+router.delete("/cart/items", verifyToken, deleteCartItem)
+router.patch("/orders/status", verifyToken, updateOrderStatus)
 
 export default router;
