@@ -758,32 +758,53 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     }
   }
 
-  export const addToCart = async (req: Request, res: Response): Promise<void> => {
+  export const addToCart = async (req: any, res: Response): Promise<void> => {
     let connection: mysql.Connection | null = null;
     try {
-      connection = await mysql.createConnection(config.database);
-      const { orderId, productId, quantity } = req.body;
+        connection = await mysql.createConnection(config.database);
+        const { productId, quantity } = req.body;
+        const userId = req.user?.user_id || req.user?.id;
 
-      if (!orderId || !productId || !quantity) {
-        res.status(400).json({ success: false, message: "Order ID, product ID, and quantity are required" });
-        return;
-      }
+        const [productRow]: any = await connection.query("SELECT price FROM products WHERE product_id = ?", [productId]);
+        if (productRow.length === 0) {
+            res.status(404).json({ success: false, message: "Termék nem található" });
+            return;
+        }
+        const price = productRow[0].price;
+        const subtotal = price * quantity;
+        const [orders]: any = await connection.query(
+            "SELECT order_id FROM orders WHERE user_id = ? AND status = 'in_progress' LIMIT 1", 
+            [userId]
+        );
+        
+        let orderId;
+        if (orders.length > 0) {
+            orderId = orders[0].order_id;
+        } else {
+            const [newOrder]: any = await connection.query(
+                "INSERT INTO orders (user_id, status, total_price, created_at) VALUES (?, 'in_progress', 0, ?)",
+                [userId, new Date().toISOString().slice(0, 10)]
+            );
+            orderId = newOrder.insertId;
+        }
 
-      await connection.query(
-        "INSERT INTO order_items (order_id, product_id, quantity) VALUES (?, ?, ?)",
-        [orderId, productId, quantity]
-      );
+        await connection.query(
+            `INSERT INTO order_items (order_id, product_id, quantity, subtotal) 
+             VALUES (?, ?, ?, ?) 
+             ON DUPLICATE KEY UPDATE 
+                quantity = quantity + VALUES(quantity), 
+                subtotal = subtotal + VALUES(subtotal)`,
+            [orderId, productId, quantity, subtotal]
+        );
 
-      res.status(201).json({ success: true, message: "Item added to cart successfully" });
-    } catch (error) {
-      console.error("Add to cart error:", error);
-      res.status(500).json({ success: false, message: "Internal server error", error: (error as any).message });
+        res.json({ success: true, message: "A kosár frissítve!" });
+    } catch (error: any) {
+        console.error(error);
+        res.status(500).json({ success: false, error: error.message });
     } finally {
-      if (connection) {
-        await connection.end();
-      }
+        if (connection) await connection.end();
     }
-  };
+};
 
   export const updateCartItem = async (req: Request, res: Response): Promise<void> => {
     let connection: mysql.Connection | null = null;
@@ -823,37 +844,48 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     }
   };
 
-  export const deleteCartItem = async (req: Request, res: Response): Promise<void> => {
+  export const deleteCartItem = async (req: any, res: Response): Promise<void> => {
     let connection: mysql.Connection | null = null;
     try {
-      connection = await mysql.createConnection(config.database);
-      const { orderId, productId } = req.body;
+        connection = await mysql.createConnection(config.database);
+        const { productId } = req.body;
+        const userId = req.user?.user_id || req.user?.id;
 
-      if (!orderId || !productId) {
-        res.status(400).json({ success: false, message: "Order ID and product ID are required" });
-        return;
-      }
+        if (!productId || !userId) {
+            res.status(400).json({ success: false, message: "Hiányzó adatok" });
+            return;
+        }
 
-      const [result] = await connection.query(
-        "DELETE FROM order_items WHERE order_id = ? AND product_id = ?",
-        [orderId, productId]
-      );
+        const [orders]: any = await connection.query(
+            "SELECT order_id FROM orders WHERE user_id = ? AND status = 'in_progress' LIMIT 1",
+            [userId]
+        );
 
-      if ((result as any).affectedRows === 0) {
-        res.status(404).json({ success: false, message: "Cart item not found" });
-        return;
-      }
+        if (orders.length === 0) {
+            res.status(404).json({ success: false, message: "Nincs aktív kosár" });
+            return;
+        }
 
-      res.json({ success: true, message: "Cart item deleted successfully" });
-    } catch (error) {
-      console.error("Delete cart item error:", error);
-      res.status(500).json({ success: false, message: "Internal server error", error: (error as any).message });
+        const orderId = orders[0].order_id;
+
+        const [result]: any = await connection.query(
+            "DELETE FROM order_items WHERE order_id = ? AND product_id = ?",
+            [orderId, productId]
+        );
+
+        if (result.affectedRows === 0) {
+            res.status(404).json({ success: false, message: "A termék nincs a kosárban" });
+            return;
+        }
+
+        res.json({ success: true, message: "Termék eltávolítva a kosárból" });
+    } catch (error: any) {
+        console.error("Delete error:", error);
+        res.status(500).json({ success: false, error: error.message });
     } finally {
-      if (connection) {
-        await connection.end();
-      }
+        if (connection) await connection.end();
     }
-  };
+};
 
   export const updateOrderStatus = async (req: Request, res: Response): Promise<void> => {
     let connection: mysql.Connection | null = null;
@@ -892,3 +924,55 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       }
     }
   };
+
+  export const getCart = async (req: any, res: Response): Promise<void> => {
+    let connection: mysql.Connection | null = null;
+    try {
+        connection = await mysql.createConnection(config.database);
+
+        const userId = req.user?.user_id || req.user?.id;
+
+        if (!userId) {
+            res.status(401).json({ success: false, message: "Nincs bejelentkezve felhasználó" });
+            return;
+        }
+
+        const [orders]: any = await connection.query(
+            "SELECT order_id FROM orders WHERE user_id = ? AND status = 'in_progress' LIMIT 1",
+            [userId]
+        );
+
+        if (orders.length === 0) {
+            res.json({ success: true, items: [] });
+            return;
+        }
+
+        const orderId = orders[0].order_id;
+
+        const [items]: any = await connection.query(
+            `SELECT p.product_id, p.product_name, p.price, p.description, p.image_url, oi.quantity 
+             FROM order_items oi 
+             JOIN products p ON oi.product_id = p.product_id 
+             WHERE oi.order_id = ?`,
+            [orderId]
+        );
+
+        const baseUrl = `${req.protocol}://${req.get("host")}`;
+        const normalizedItems = items.map((item: any) => {
+            let imageUrl = item?.image_url || "";
+            if (imageUrl && !imageUrl.startsWith("http")) {
+                imageUrl = imageUrl.replace(/^\.\.\//, "").replace(/^kepek\//, "");
+                imageUrl = `${baseUrl}/kepek/${imageUrl}`;
+            }
+            return { ...item, image_url: imageUrl };
+        });
+
+        res.json({ success: true, items: normalizedItems });
+
+    } catch (error: any) {
+        console.error("Hiba a getCart-ban:", error.message);
+        res.status(500).json({ success: false, error: error.message });
+    } finally {
+        if (connection) await connection.end();
+    }
+};

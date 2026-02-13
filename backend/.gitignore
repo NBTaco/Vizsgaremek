@@ -1,13 +1,2 @@
-<<<<<<< HEAD
 node_modules/
 dir/
-=======
-dir
-node_modules/
-dist/
-coverage/
-.env
-.DS_Store
-logs/
-*.log
->>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74

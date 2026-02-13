@@ -1,0 +1,125 @@
+.cart-wrapper {
+  background-color: #708090;
+  min-height: 80vh;
+  padding: 50px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: black;
+}
+
+.cart-container {
+  background-color: #dcdcdc;
+  padding: 15px;
+  width: 100%;
+  max-width: 1000px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.cart-table-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.h-cell {
+  background-color: #8a8a8a;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.cart-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.i-cell {
+  background-color: white; 
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+}
+
+.product-info {
+  justify-content: flex-start;
+  gap: 15px;
+  text-align: left;
+}
+
+.cart-img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.name-and-del {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.del-btn {
+  background: none;
+  border: none;
+  color: #c0392b;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  font-size:2rem;
+  text-align: center;
+}
+
+.cart-summary-section {
+  width: 100%;
+  max-width: 1000px;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.total-box {
+  background-color: #dcdcdc;
+  padding: 20px;
+  width: 300px;
+  text-align: center;
+}
+
+.total-box p {
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+}
+
+.checkout-btn {
+  background-color: white;
+  border: 1px solid #8a8a8a;
+  padding: 12px 20px;
+  width: 100%;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+  color: black;
+}
+
+.checkout-btn:hover:not(:disabled) {
+  background-color: #f0f0f0;
+}
+
+.checkout-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.empty-msg {
+  background-color: white;
+  padding: 40px;
+  text-align: center;
+}

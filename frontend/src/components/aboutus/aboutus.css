@@ -1,15 +1,16 @@
 .aboutus-card {
   padding: 20px;
-  min-height: 80vh;
   display: flex;
   flex-direction: column;
+  gap: 20px;
 }
 
 .top {
   display: flex;
   gap: 16px;
   align-items: stretch;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
+  height: 400px;
 }
 
 .image-container {
@@ -36,21 +37,28 @@
 .box {
   background: #e0e0e0;
   border-radius: 8px;
-  padding: 12px;
-  font-size: 14px;
-  min-height: 60px;
+  padding: 16px;
+  font-size: 15px;
+  min-height: 80px;
+  color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.4;
 }
 
 .box.small {
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .bottom {
   margin-top: 20px;
   background: #e0e0e0;
   border-radius: 8px;
-  padding: 16px;
-  min-height: 120px;
+  padding: 20px;
   font-size: 14px;
-  flex: 0 0 auto;
+  color: black;
+  line-height: 1.6-word;
+  overflow-wrap: break-word;
 }

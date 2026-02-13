@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2026. Feb 13. 10:51
+-- Létrehozás ideje: 2026. Feb 13. 17:35
 -- Kiszolgáló verziója: 10.4.32-MariaDB
--- PHP verzió: 8.0.30
+-- PHP verzió: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -77,10 +77,18 @@ INSERT INTO `categories` (`category_id`, `name`) VALUES
 CREATE TABLE `orders` (
   `order_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `total_price` int(11) NOT NULL,
+  `total_price` int(11) NOT NULL DEFAULT 0,
   `status` varchar(50) NOT NULL,
-  `created_at` varchar(10) NOT NULL
+  `created_at` varchar(10) DEFAULT '2026-02-13'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- A tábla adatainak kiíratása `orders`
+--
+
+INSERT INTO `orders` (`order_id`, `user_id`, `total_price`, `status`, `created_at`) VALUES
+(1, 5, 0, 'in_progress', ''),
+(2, 1, 0, 'in_progress', '2026-02-13');
 
 -- --------------------------------------------------------
 
@@ -94,6 +102,14 @@ CREATE TABLE `order_items` (
   `quantity` int(11) NOT NULL,
   `subtotal` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- A tábla adatainak kiíratása `order_items`
+--
+
+INSERT INTO `order_items` (`order_id`, `product_id`, `quantity`, `subtotal`) VALUES
+(1, 8, 1, 7000),
+(2, 3, 1, 4500);
 
 -- --------------------------------------------------------
 
@@ -146,7 +162,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `username`, `email`, `password_hash`, `role`) VALUES
-(1, 'admin', 'admin@gmail.com', '$2a$10$ObQGeonWFnh1OjnBAtLk/eOnmqW4f04CM7.APuBNMXFy0jWT4fNIq', 'admin');
+(1, 'admin', 'admin@gmail.com', '$2a$10$ObQGeonWFnh1OjnBAtLk/eOnmqW4f04CM7.APuBNMXFy0jWT4fNIq', 'admin'),
+(5, 'nandi', 'gtanandika04@gmail.com', '$2b$10$Q5qUuJm1VnirgI4TwYJKL.bfOmhYfihfzO8UGVw.E6HsaEniYVfX6', 'user');
 
 --
 -- Indexek a kiírt táblákhoz
@@ -163,6 +180,12 @@ ALTER TABLE `categories`
 --
 ALTER TABLE `orders`
   ADD PRIMARY KEY (`order_id`);
+
+--
+-- A tábla indexei `order_items`
+--
+ALTER TABLE `order_items`
+  ADD UNIQUE KEY `unique_order_product` (`order_id`,`product_id`);
 
 --
 -- A tábla indexei `products`
@@ -193,7 +216,7 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT a táblához `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT a táblához `products`
@@ -205,7 +228,7 @@ ALTER TABLE `products`
 -- AUTO_INCREMENT a táblához `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
