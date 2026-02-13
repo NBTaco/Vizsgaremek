@@ -72,7 +72,10 @@ function Header({ user }: any) {
               </>
             )}
             <a href="#">Beállítások</a>
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
           </div>
         )}
       </div>

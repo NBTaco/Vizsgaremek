@@ -21,7 +21,3 @@ html, body, #root {
   font-family: 'Arial', sans-serif;
   color: #000000;
 }
-
-* {
-  box-sizing: border-box;
-}

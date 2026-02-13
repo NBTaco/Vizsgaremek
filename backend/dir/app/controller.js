@@ -86,7 +86,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+<<<<<<< HEAD
 exports.updateOrderStatus = exports.deleteCartItem = exports.updateCartItem = exports.addToCart = exports.createOrder = exports.getUserRole = exports.deleteCategory = exports.addCategory = exports.getCategories = exports.deleteItem = exports.updateItem = exports.addItem = exports.getItemById = exports.getItemsByCategories = exports.userSettings = exports.loginUser = exports.registerUser = exports.run = void 0;
+=======
+exports.updateOrderStatus = exports.deleteCartItem = exports.updateCartItem = exports.addToCart = exports.createOrder = exports.getUserRole = exports.deleteCategory = exports.addCategory = exports.getCategories = exports.deleteItem = exports.updateItem = exports.addItem = exports.getItemsByCategories = exports.userSettings = exports.loginUser = exports.registerUser = exports.run = void 0;
+>>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
 var bcrypt_1 = __importDefault(require("bcrypt"));
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var promise_1 = __importDefault(require("mysql2/promise"));
@@ -940,7 +944,11 @@ var getUserRole = function (req, res) { return __awaiter(void 0, void 0, void 0,
 }); };
 exports.getUserRole = getUserRole;
 var createOrder = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+<<<<<<< HEAD
     var connection, userId, _a, result, orderId, error_12;
+=======
+    var connection, userId, _a, result, orderId, error_11;
+>>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -959,9 +967,15 @@ var createOrder = function (req, res) { return __awaiter(void 0, void 0, void 0,
                 res.status(201).json({ success: true, message: "Order created successfully", orderId: orderId });
                 return [3 /*break*/, 8];
             case 4:
+<<<<<<< HEAD
                 error_12 = _b.sent();
                 console.error("Create order error:", error_12);
                 res.status(500).json({ success: false, message: "Internal server error", error: error_12.message });
+=======
+                error_11 = _b.sent();
+                console.error("Create order error:", error_11);
+                res.status(500).json({ success: false, message: "Internal server error", error: error_11.message });
+>>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
                 return [3 /*break*/, 8];
             case 5:
                 if (!connection) return [3 /*break*/, 7];
@@ -976,7 +990,11 @@ var createOrder = function (req, res) { return __awaiter(void 0, void 0, void 0,
 }); };
 exports.createOrder = createOrder;
 var addToCart = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+<<<<<<< HEAD
     var connection, _a, orderId, productId, quantity, error_13;
+=======
+    var connection, _a, orderId, productId, quantity, error_12;
+>>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -998,9 +1016,15 @@ var addToCart = function (req, res) { return __awaiter(void 0, void 0, void 0, f
                 res.status(201).json({ success: true, message: "Item added to cart successfully" });
                 return [3 /*break*/, 8];
             case 4:
+<<<<<<< HEAD
                 error_13 = _b.sent();
                 console.error("Add to cart error:", error_13);
                 res.status(500).json({ success: false, message: "Internal server error", error: error_13.message });
+=======
+                error_12 = _b.sent();
+                console.error("Add to cart error:", error_12);
+                res.status(500).json({ success: false, message: "Internal server error", error: error_12.message });
+>>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
                 return [3 /*break*/, 8];
             case 5:
                 if (!connection) return [3 /*break*/, 7];
@@ -1015,7 +1039,11 @@ var addToCart = function (req, res) { return __awaiter(void 0, void 0, void 0, f
 }); };
 exports.addToCart = addToCart;
 var updateCartItem = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+<<<<<<< HEAD
     var connection, _a, orderId, productId, quantity, parsedQuantity, _b, result, error_14;
+=======
+    var connection, _a, orderId, productId, quantity, parsedQuantity, _b, result, error_13;
+>>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
     return __generator(this, function (_c) {
         switch (_c.label) {
             case 0:
@@ -1046,9 +1074,15 @@ var updateCartItem = function (req, res) { return __awaiter(void 0, void 0, void
                 res.json({ success: true, message: "Cart item updated successfully" });
                 return [3 /*break*/, 8];
             case 4:
+<<<<<<< HEAD
                 error_14 = _c.sent();
                 console.error("Update cart item error:", error_14);
                 res.status(500).json({ success: false, message: "Internal server error", error: error_14.message });
+=======
+                error_13 = _c.sent();
+                console.error("Update cart item error:", error_13);
+                res.status(500).json({ success: false, message: "Internal server error", error: error_13.message });
+>>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
                 return [3 /*break*/, 8];
             case 5:
                 if (!connection) return [3 /*break*/, 7];
@@ -1063,7 +1097,11 @@ var updateCartItem = function (req, res) { return __awaiter(void 0, void 0, void
 }); };
 exports.updateCartItem = updateCartItem;
 var deleteCartItem = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+<<<<<<< HEAD
     var connection, _a, orderId, productId, _b, result, error_15;
+=======
+    var connection, _a, orderId, productId, _b, result, error_14;
+>>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
     return __generator(this, function (_c) {
         switch (_c.label) {
             case 0:
@@ -1089,9 +1127,15 @@ var deleteCartItem = function (req, res) { return __awaiter(void 0, void 0, void
                 res.json({ success: true, message: "Cart item deleted successfully" });
                 return [3 /*break*/, 8];
             case 4:
+<<<<<<< HEAD
                 error_15 = _c.sent();
                 console.error("Delete cart item error:", error_15);
                 res.status(500).json({ success: false, message: "Internal server error", error: error_15.message });
+=======
+                error_14 = _c.sent();
+                console.error("Delete cart item error:", error_14);
+                res.status(500).json({ success: false, message: "Internal server error", error: error_14.message });
+>>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
                 return [3 /*break*/, 8];
             case 5:
                 if (!connection) return [3 /*break*/, 7];
@@ -1106,7 +1150,11 @@ var deleteCartItem = function (req, res) { return __awaiter(void 0, void 0, void
 }); };
 exports.deleteCartItem = deleteCartItem;
 var updateOrderStatus = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+<<<<<<< HEAD
     var connection, _a, orderId, status, trimmedStatus, _b, result, error_16;
+=======
+    var connection, _a, orderId, status, trimmedStatus, _b, result, error_15;
+>>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
     return __generator(this, function (_c) {
         switch (_c.label) {
             case 0:
@@ -1137,9 +1185,15 @@ var updateOrderStatus = function (req, res) { return __awaiter(void 0, void 0, v
                 res.json({ success: true, message: "Order status updated successfully" });
                 return [3 /*break*/, 8];
             case 4:
+<<<<<<< HEAD
                 error_16 = _c.sent();
                 console.error("Update order status error:", error_16);
                 res.status(500).json({ success: false, message: "Internal server error", error: error_16.message });
+=======
+                error_15 = _c.sent();
+                console.error("Update order status error:", error_15);
+                res.status(500).json({ success: false, message: "Internal server error", error: error_15.message });
+>>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
                 return [3 /*break*/, 8];
             case 5:
                 if (!connection) return [3 /*break*/, 7];
