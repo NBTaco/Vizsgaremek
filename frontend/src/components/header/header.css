@@ -33,6 +33,7 @@
 
 .menu-container {
   position: relative; 
+  display: flex;
   align-items: center;
   justify-content: center;
 }
@@ -48,13 +49,15 @@
 
 .dropdown {
   position: absolute;
-  margin-top: 100px; 
+  top: calc(100% + 8px);
+  right: 0;
   background: #b8b7b7;
-  width: 160px;
+  min-width: 160px;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
   z-index: 999;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
 .dropdown a {

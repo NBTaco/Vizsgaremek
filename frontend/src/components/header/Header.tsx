@@ -67,8 +67,6 @@ function Header({ user }: any) {
               </>
             )}
             <a href="#">Beállítások</a>
-            <a href="#" onClick={() => setOpen(!open)}>Bezárás</a>
-
           </div>
         )}
       </div>

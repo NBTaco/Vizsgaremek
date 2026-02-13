@@ -48,4 +48,14 @@ router.patch("/items/:productId", auth_1.default, auth_1.requireAdmin, controlle
 router.post("/aboutus", controller_1.userSettings);
 router.get("/categories", controller_1.getCategories);
 router.get("/role/:username", controller_1.getUserRole);
+router.post("/additem", controller_1.addItem);
+router.post("/updateitem", controller_1.updateItem);
+router.post("/deleteitem", controller_1.deleteItem);
+router.post("/addcategory", controller_1.addCategory);
+router.post("/deletecategory/:categoryId", controller_1.deleteCategory);
+router.post("/orders", auth_1.default, controller_1.createOrder);
+router.post("/cart/items", auth_1.default, controller_1.addToCart);
+router.patch("/cart/items", auth_1.default, controller_1.updateCartItem);
+router.delete("/cart/items", auth_1.default, controller_1.deleteCartItem);
+router.patch("/orders/status", auth_1.default, controller_1.updateOrderStatus);
 exports.default = router;
