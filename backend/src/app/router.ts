@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addCategory, addItem, addToCart, createOrder, deleteCartItem, deleteCategory, deleteItem, getCategories, getItemsByCategories, getUserRole, loginUser, registerUser, run, updateCartItem, updateItem, updateOrderStatus, userSettings } from "./controller";
+import { addCategory, addItem, addToCart, createOrder, deleteCartItem, deleteCategory, deleteItem, getCategories, getItemById, getItemsByCategories, getUserRole, loginUser, registerUser, run, updateCartItem, updateItem, updateOrderStatus, userSettings } from "./controller";
 import verifyToken, { requireAdmin } from "../middleware/auth"
 
 const router = Router();
@@ -12,6 +12,7 @@ router.post("/user", userSettings, verifyToken);
 router.get("/items", getItemsByCategories);
 router.post("/items", verifyToken, requireAdmin, addItem);
 router.patch("/items/:productId", verifyToken, requireAdmin, updateItem);
+router.get("/items/:productId", getItemById);
 router.post("/aboutus", userSettings);
 router.get("/categories", getCategories)
 router.get("/role/:username", getUserRole)

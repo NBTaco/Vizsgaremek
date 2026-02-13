@@ -3,12 +3,15 @@ import "./header.css";
 import { Link } from "react-router-dom";
 import LogIn from "../login/LogIn";
 import Registration from "../registration/Registration";
+import { useNavigate } from "react-router-dom";
 
 function Header({ user }: any) {
   const [open, setOpen] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [loggedInUser, setloggedInUser] = useState(user || null);
   const [showRegistration, setShowRegistration] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
   const storedUser = localStorage.getItem("user");
@@ -22,6 +25,7 @@ function Header({ user }: any) {
     setloggedInUser(user);
     localStorage.setItem("user", JSON.stringify(user));
     setShowLogin(false);
+    window.location.reload();
   };
 
   const handleLogout = () => {
@@ -29,6 +33,7 @@ function Header({ user }: any) {
     localStorage.removeItem("user");
     localStorage.removeItem("username");
     localStorage.removeItem("token");
+      navigate("/");
   };
 
   const handleRegistrationSuccess = (user: any) => {
@@ -42,8 +47,8 @@ function Header({ user }: any) {
       <div className="logo"><Link to="/">NAMERO.1</Link></div>
 
       <nav className="nav">
+        <Link to="/">Főoldal</Link>
         <Link to="/products">Termékek</Link>
-        <Link to="/contact">Kapcsolat</Link>
         <Link to="/aboutus">Rólunk</Link>
       </nav>
 
@@ -67,7 +72,6 @@ function Header({ user }: any) {
               </>
             )}
             <a href="#">Beállítások</a>
-            <a href="#" onClick={() => setOpen(!open)}>Bezárás</a>
 
           </div>
         )}

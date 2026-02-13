@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2026. Feb 05. 16:31
+-- Létrehozás ideje: 2026. Feb 13. 10:51
 -- Kiszolgáló verziója: 10.4.32-MariaDB
--- PHP verzió: 8.2.12
+-- PHP verzió: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -106,6 +106,7 @@ CREATE TABLE `products` (
   `product_name` varchar(255) NOT NULL,
   `price` int(11) NOT NULL,
   `stock` int(11) NOT NULL,
+  `description` text NOT NULL,
   `image_url` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -113,18 +114,18 @@ CREATE TABLE `products` (
 -- A tábla adatainak kiíratása `products`
 --
 
-INSERT INTO `products` (`product_id`, `product_name`, `price`, `stock`, `image_url`) VALUES
-(1, 'Bitfejkészlet', 6999, 2, '../kepek/1.png'),
-(2, 'Csavarhúzó', 6750, 6, '../kepek/2.png'),
-(3, 'Csavarozógép', 4500, 4, '../kepek/3.png'),
-(4, 'Gumikalapács', 3000, 5, '../kepek/4.png'),
-(5, 'Kalapács', 1500, 6, '../kepek/5.png'),
-(6, 'Korfűrész', 10000, 7, '../kepek/6.png'),
-(7, 'Pajszer', 12300, 8, '../kepek/7.png'),
-(8, 'Racsni', 7000, 3, '../kepek/8.png'),
-(9, 'Sarokcsiszoló', 6500, 2, '../kepek/9.png'),
-(10, 'Vésőgép', 5400, 4, '../kepek/10.png'),
-(11, 'Csiszológép', 12300, 1, '../kepek/11.png');
+INSERT INTO `products` (`product_id`, `product_name`, `price`, `stock`, `description`, `image_url`) VALUES
+(1, 'Bitfejkészlet', 6999, 2, 'Professzionális 32 részes készlet strapabíró S2 acélból, minden típusú csavarozási feladathoz.', '../kepek/1.png'),
+(2, 'Csavarhúzó', 6750, 6, 'Mágneses hegyű, ergonomikus markolatú csavarhúzó készlet a kényelmes és precíz munkavégzésért.', '../kepek/2.png'),
+(3, 'Csavarozógép', 4500, 4, 'Könnyű és kompakt akkumulátoros csavarozó, beépített LED világítással a sötét sarkokhoz.', '../kepek/3.png'),
+(4, 'Gumikalapács', 3000, 5, 'Kíméletes ütéseket biztosító szerszám, ideális burkoláshoz és bútor összeszereléshez.', '../kepek/4.png'),
+(5, 'Kalapács', 1500, 6, 'Klasszikus acélfejű kalapács rezgéscsillapító nyéllel, ház körüli munkákhoz elengedhetetlen.', '../kepek/5.png'),
+(6, 'Korfűrész', 10000, 7, 'Nagy teljesítményű körfűrész precíz vágásokhoz, állítható dőlésszöggel és mélységgel.', '../kepek/6.png'),
+(7, 'Pajszer', 12300, 8, 'Edzett acél feszítővas, amely a legnehezebb bontási munkálatok során sem hagy cserben.', '../kepek/7.png'),
+(8, 'Racsni', 7000, 3, 'Finomfogazású kilincsműves kulcs, amely szűk helyeken is hatékony munkát tesz lehetővé.', '../kepek/8.png'),
+(9, 'Sarokcsiszoló', 6500, 2, 'Sokoldalú szerszám vágáshoz és csiszoláshoz, biztonsági védőburkolattal és pótfogantyúval.', '../kepek/9.png'),
+(10, 'Vésőgép', 5400, 4, 'Nagy ütőerejű elektromos vésőgép beton és téglafalak bontásához, SDS-Plus befogóval.', '../kepek/10.png'),
+(11, 'Csiszológép', 12300, 1, 'Excenteres csiszoló porelszívó tartállyal a tökéletesen sima fafelületek eléréséhez.', '../kepek/11.png');
 
 -- --------------------------------------------------------
 

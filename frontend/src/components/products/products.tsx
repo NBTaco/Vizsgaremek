@@ -100,6 +100,7 @@ export default function Products() {
           {filteredProducts.length > 0 ? (
             filteredProducts.map((p: any) => (
               <Product
+                id={p.product_id}
                 key={p.product_id}
                 image={p.image_url}
                 name={p.product_name}
