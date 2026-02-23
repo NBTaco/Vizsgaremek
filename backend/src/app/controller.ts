@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import mysql from "mysql2/promise";
+import fs from "fs";
+import path from "path";
 import config from "../config/config";
 
 const SALT_ROUNDS = 10;
@@ -201,84 +203,53 @@ export const userSettings = async (req: Request, res: Response): Promise<void> =
 };
 
 
-export const getItemsByCategories = async (req: Request, res: Response): Promise<void> => {
+export const getAllItems = async (req: Request, res: Response): Promise<void> => {
   try {
     const connection = await mysql.createConnection(config.database);
 
-    const categoryIdParam = req.query?.category_ids || req.body?.category_ids;
-    let categoryIds: number[] = [];
+    const [rows] = await connection.query(
+      `SELECT p.product_id, p.product_name, p.price, p.stock, p.image_url, p.description,
+              b.category_id, c.name AS category_name
+       FROM products p
+       LEFT JOIN belongs b ON p.product_id = b.product_id
+       LEFT JOIN categories c ON b.category_id = c.category_id
+       ORDER BY p.product_id`
+    );
 
-    if (categoryIdParam) {
-      if (typeof categoryIdParam === "string") {
-        categoryIds = categoryIdParam.split(",").map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
-      } else if (Array.isArray(categoryIdParam)) {
-        categoryIds = (categoryIdParam as any[]).map(s => parseInt(String(s).trim(), 10)).filter(n => !isNaN(n));
-      } else if (typeof categoryIdParam === "number") {
-        categoryIds = [categoryIdParam as number];
-      }
-
-      if (categoryIdParam && categoryIds.length === 0) {
-        res.status(400).json({ success: false, message: "Invalid category_ids parameter" });
-        await connection.end();
-        return;
-      }
-    }
-
-    const categoryNameParam = req.query?.category_names || req.body?.category_names || req.query?.category || req.body?.category;
-    let categoryNames: string[] = [];
-
-    if (categoryNameParam) {
-      if (typeof categoryNameParam === "string") {
-        categoryNames = categoryNameParam.split(",").map(s => s.trim()).filter(s => s.length > 0);
-      } else if (Array.isArray(categoryNameParam)) {
-        categoryNames = (categoryNameParam as any[]).map(s => String(s).trim()).filter(s => s.length > 0);
-      } else {
-        categoryNames = [String(categoryNameParam).trim()].filter(s => s.length > 0);
-      }
-
-      if (categoryNameParam && categoryNames.length === 0) {
-        res.status(400).json({ success: false, message: "Invalid category_names parameter" });
-        await connection.end();
-        return;
-      }
-    }
-
-    let query = "SELECT p.product_id, p.product_name, p.price, p.stock, p.image_url FROM products p";
-    const whereClauses: string[] = [];
-    const params: any[] = [];
-
-    if (categoryIds.length > 0 || categoryNames.length > 0) {
-      query += " JOIN belongs b ON p.product_id = b.product_id JOIN categories c ON b.category_id = c.category_id";
-
-      if (categoryIds.length > 0) {
-        whereClauses.push("b.category_id IN (" + categoryIds.map(() => "?").join(",") + ")");
-        params.push(...categoryIds);
-      }
-
-      if (categoryNames.length > 0) {
-        whereClauses.push("c.name IN (" + categoryNames.map(() => "?").join(",") + ")");
-        params.push(...categoryNames);
-      }
-
-      query += " WHERE (" + whereClauses.join(" OR ") + ") GROUP BY p.product_id";
-    }
-
-    const [rows] = await connection.query(query, params);
-    const items = Array.isArray(rows) ? rows : [];
+    const rawRows = Array.isArray(rows) ? rows : [];
     const baseUrl = `${req.protocol}://${req.get("host")}`;
 
-    const normalizedItems = items.map((item: any) => {
-      let imageUrl = item?.image_url || "";
-      
-      if (!imageUrl.startsWith("http")) {
+    const productsMap = new Map<number, any>();
+    for (const row of rawRows as any[]) {
+      let imageUrl = row.image_url || "";
+      if (imageUrl && !imageUrl.startsWith("http")) {
         imageUrl = imageUrl.replace(/^\.\.\//, "").replace(/^kepek\//, "");
         imageUrl = `${baseUrl}/kepek/${imageUrl}`;
       }
 
-      return { ...item, image_url: imageUrl };
-    });
+      if (!productsMap.has(row.product_id)) {
+        productsMap.set(row.product_id, {
+          product_id: row.product_id,
+          product_name: row.product_name,
+          price: row.price,
+          stock: row.stock,
+          description: row.description,
+          image_url: imageUrl,
+          category_ids: [],
+          category_names: []
+        });
+      }
 
-    res.json({ items: normalizedItems });
+      if (row.category_id) {
+        const product = productsMap.get(row.product_id);
+        product.category_ids.push(row.category_id);
+        product.category_names.push(row.category_name);
+      }
+    }
+
+    const items = Array.from(productsMap.values());
+
+    res.json({ items });
 
     await connection.end();
   } catch (error) {
@@ -343,10 +314,12 @@ export const addItem = async (req: Request, res: Response): Promise<void> => {
   let connection: mysql.Connection | null = null;
   try {
     connection = await mysql.createConnection(config.database);
-    const { product_name, price, stock, image_url, category_ids } = req.body;
+    const { product_name, price, stock, category_ids } = req.body;
+    const file = req.file;
 
-    if (!product_name || price === undefined || stock === undefined || !image_url) {
-      res.status(400).json({ success: false, message: "product_name, price, stock, image_url are required" });
+    if (!product_name || price === undefined || stock === undefined || !file) {
+      res.status(400).json({ success: false, message: "product_name, price, stock, and image file are required" });
+      if (file) fs.unlinkSync(file.path);
       await connection.end();
       return;
     }
@@ -356,6 +329,7 @@ export const addItem = async (req: Request, res: Response): Promise<void> => {
 
     if (!Number.isFinite(parsedPrice) || parsedPrice < 0 || !Number.isFinite(parsedStock) || parsedStock < 0) {
       res.status(400).json({ success: false, message: "price and stock must be non-negative numbers" });
+      fs.unlinkSync(file.path);
       await connection.end();
       return;
     }
@@ -372,6 +346,7 @@ export const addItem = async (req: Request, res: Response): Promise<void> => {
 
       if (category_ids !== undefined && categoryIds.length === 0) {
         res.status(400).json({ success: false, message: "Invalid category_ids" });
+        fs.unlinkSync(file.path);
         await connection.end();
         return;
       }
@@ -381,10 +356,19 @@ export const addItem = async (req: Request, res: Response): Promise<void> => {
 
     const [result] = await connection.query(
       "INSERT INTO products (product_name, price, stock, image_url) VALUES (?, ?, ?, ?)",
-      [product_name, parsedPrice, parsedStock, image_url]
+      [product_name, parsedPrice, parsedStock, ""]
     );
 
     const productId = (result as any).insertId;
+
+    const ext = path.extname(file.originalname) || ".png";
+    const kepekDir = path.resolve(__dirname, "..", "..", "kepek");
+    const newFileName = `${productId}${ext}`;
+    await fs.promises.copyFile(file.path, path.join(kepekDir, newFileName));
+    await fs.promises.unlink(file.path);
+
+    const imageUrl = `../kepek/${newFileName}`;
+    await connection.query("UPDATE products SET image_url = ? WHERE product_id = ?", [imageUrl, productId]);
 
     if (categoryIds.length > 0) {
       const values = categoryIds.map(() => "(?, ?)").join(", ");
@@ -401,10 +385,14 @@ export const addItem = async (req: Request, res: Response): Promise<void> => {
       success: true,
       message: "Item added successfully",
       product_id: productId,
+      image_url: imageUrl,
     });
   } catch (error) {
     if (connection) {
       await connection.rollback();
+    }
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
     }
     console.error("Add item error:", error);
     res.status(500).json({ success: false, message: "Internal server error", error: (error as any).message });
