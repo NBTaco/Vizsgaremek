@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 import "./oneproduct.css";
 import Header from "../header/Header";
 import Footer from "../footer/Footer";
 import Title from "../title/title";
+import EditItem from "../edititem/edititem";
 
 interface Product {
   product_id: number;
@@ -12,6 +14,7 @@ interface Product {
   stock: number;
   image_url: string;
   description: string;
+  category_ids?: number[];
 }
 
 const OneProduct = () => {
@@ -20,63 +23,78 @@ const OneProduct = () => {
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [role, setRole] = useState<string | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
 
   useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`http://localhost:3000/items/${id}`);
-        const data = await response.json();
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setRole(null);
+      return;
+    }
+    try {
+      const decoded = jwtDecode<{ role?: string }>(token);
+      setRole(decoded?.role ?? null);
+    } catch (err) {
+      console.error("Invalid token", err);
+      setRole(null);
+    }
+  }, []);
 
-        if (data.success) {
-          setProduct(data.item);
-        } else {
-            console.log("sikertelen")
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
+  const fetchProduct = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:3000/items/${id}`);
+      const data = await response.json();
+      if (data.success) {
+        setProduct(data.item);
+      } else {
+        console.log("sikertelen");
       }
-    };
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     if (id) fetchProduct();
   }, [id]);
 
   if (loading) return <div className="status-msg">Betöltés...</div>;
-  if (!product)
-    return <div className="status-msg">A termék nem található.</div>;
+  if (!product) return <div className="status-msg">A termék nem található.</div>;
 
   const handleAddToCart = async () => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    alert("Kérlek, jelentkezz be a vásárláshoz!");
-    return;
-  }
-
-  try {
-    const response = await fetch("http://localhost:3000/cart/items", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-access-token": token
-      },
-      body: JSON.stringify({
-        productId: product.product_id,
-        quantity: 1
-      })
-    });
-
-    const data = await response.json();
-    if (data.success) {
-      alert("Termék sikeresen a kosárba került!");
-    } else {
-      alert("Hiba: " + data.message);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Kérlek, jelentkezz be a vásárláshoz!");
+      return;
     }
-  } catch (err) {
-    console.error("Hiba a kosárba tételkor:", err);
-  }
-};
+
+    try {
+      const response = await fetch("http://localhost:3000/cart/items", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": token,
+        },
+        body: JSON.stringify({
+          productId: product.product_id,
+          quantity: 1,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        alert("Termék sikeresen a kosárba került!");
+      } else {
+        alert("Hiba: " + data.message);
+      }
+    } catch (err) {
+      console.error("Hiba a kosárba tételkor:", err);
+    }
+  };
 
   return (
     <>
@@ -115,9 +133,27 @@ const OneProduct = () => {
             >
               {product.stock > 0 ? "Kosárhoz adás" : "Elfogyott"}
             </button>
+
+            {role === "admin" && (
+              <button className="edit-btn" onClick={() => setEditOpen(true)}>
+                Termék szerkesztése
+              </button>
+            )}
           </div>
         </div>
       </div>
+
+      {editOpen && (
+        <EditItem
+          product={product}
+          onClose={() => setEditOpen(false)}
+          onUpdated={() => {
+            setEditOpen(false);
+            fetchProduct();
+          }}
+        />
+      )}
+
       <Footer />
     </>
   );

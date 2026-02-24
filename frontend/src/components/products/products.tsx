@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import EditCategories from "../addcategory/editcategories";
 import "./products.css";
+import AddItem from "../additem/additem";
 
 export default function Products() {
   const [categories, setCategories] = useState([]);
@@ -13,6 +14,8 @@ export default function Products() {
   const [role, setRole] = useState<string | null>(null);
   const [showEditCategories, setShowEditCategories] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [showAddItem, setShowAddItem] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -59,12 +62,17 @@ export default function Products() {
   }, []);
 
   const filteredProducts = products.filter((p: any) => {
-    const matchesSearch = p.product_name
+  const matchesSearch =
+    p.product_name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
 
-    return matchesSearch;
-  });
+  const matchesCategory =
+    selectedCategory === "" ||
+    p.category_names.includes(selectedCategory);
+
+  return matchesSearch && matchesCategory;
+});
 
   return (
     <>
@@ -82,17 +90,16 @@ export default function Products() {
       <div className="products-layout">
         <div className="filters">
           <p>Szűrés</p>
-          <select>
-            <option>Kategóriák</option>
-            {categories.map((e: any) => (
-              <option key={e.category_id}>{e.name}</option>
+          <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
+            <option value="">Kategóriák</option>
+              {categories.map((e: any) => (
+            <option key={e.category_id} value={e.name}>{e.name}</option>
             ))}
           </select>
           {role === "admin" && (
             <div>
-              <button onClick={() => setShowEditCategories(true)}>
-                Kategóriák szerkesztése
-              </button>
+              <button onClick={() => setShowEditCategories(true)}>Kategóriák szerkesztése</button>
+              <button onClick={() => setShowAddItem(true)}>Termék hozzáadása</button>
             </div>
           )}
         </div>
@@ -119,6 +126,13 @@ export default function Products() {
             getCategories();
           }}
         />
+      )}
+      {showAddItem && (
+        <AddItem
+          onClose={() => {
+            setShowAddItem(false);
+        }}
+      />
       )}
       <Footer />
     </>

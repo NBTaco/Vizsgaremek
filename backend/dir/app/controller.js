@@ -73,27 +73,27 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
         }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-<<<<<<< HEAD
-exports.updateOrderStatus = exports.deleteCartItem = exports.updateCartItem = exports.addToCart = exports.createOrder = exports.getUserRole = exports.deleteCategory = exports.addCategory = exports.getCategories = exports.deleteItem = exports.updateItem = exports.addItem = exports.getItemById = exports.getItemsByCategories = exports.userSettings = exports.loginUser = exports.registerUser = exports.run = void 0;
-=======
-exports.updateOrderStatus = exports.deleteCartItem = exports.updateCartItem = exports.addToCart = exports.createOrder = exports.getUserRole = exports.deleteCategory = exports.addCategory = exports.getCategories = exports.deleteItem = exports.updateItem = exports.addItem = exports.getItemsByCategories = exports.userSettings = exports.loginUser = exports.registerUser = exports.run = void 0;
->>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
+exports.getOrdersByUser = exports.getAllOrders = exports.getCart = exports.updateOrderStatus = exports.deleteCartItem = exports.updateCartItem = exports.addToCart = exports.createOrder = exports.getUserRole = exports.deleteCategory = exports.addCategory = exports.getCategories = exports.deleteItem = exports.updateItem = exports.addItem = exports.getItemById = exports.getAllItems = exports.userSettings = exports.loginUser = exports.registerUser = exports.run = void 0;
 var bcrypt_1 = __importDefault(require("bcrypt"));
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var promise_1 = __importDefault(require("mysql2/promise"));
+var fs_1 = __importDefault(require("fs"));
+var path_1 = __importDefault(require("path"));
 var config_1 = __importDefault(require("../config/config"));
 var SALT_ROUNDS = 10;
 var run = function (_req, res) {
@@ -314,97 +314,72 @@ var userSettings = function (req, res) { return __awaiter(void 0, void 0, void 0
     });
 }); };
 exports.userSettings = userSettings;
-var getItemsByCategories = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var connection, categoryIdParam, categoryIds, categoryNameParam, categoryNames, query, whereClauses, params, _a, rows, items, baseUrl_1, normalizedItems, error_4;
-    var _b, _c, _d, _e, _f, _g;
-    return __generator(this, function (_h) {
-        switch (_h.label) {
+var getAllItems = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var connection, _a, rows, rawRows, baseUrl, productsMap, _b, _c, row, imageUrl, product, items, error_4;
+    var e_2, _d;
+    return __generator(this, function (_e) {
+        switch (_e.label) {
             case 0:
-                _h.trys.push([0, 8, , 9]);
+                _e.trys.push([0, 4, , 5]);
                 return [4 /*yield*/, promise_1.default.createConnection(config_1.default.database)];
             case 1:
-                connection = _h.sent();
-                categoryIdParam = ((_b = req.query) === null || _b === void 0 ? void 0 : _b.category_ids) || ((_c = req.body) === null || _c === void 0 ? void 0 : _c.category_ids);
-                categoryIds = [];
-                if (!categoryIdParam) return [3 /*break*/, 3];
-                if (typeof categoryIdParam === "string") {
-                    categoryIds = categoryIdParam.split(",").map(function (s) { return parseInt(s.trim(), 10); }).filter(function (n) { return !isNaN(n); });
-                }
-                else if (Array.isArray(categoryIdParam)) {
-                    categoryIds = categoryIdParam.map(function (s) { return parseInt(String(s).trim(), 10); }).filter(function (n) { return !isNaN(n); });
-                }
-                else if (typeof categoryIdParam === "number") {
-                    categoryIds = [categoryIdParam];
-                }
-                if (!(categoryIdParam && categoryIds.length === 0)) return [3 /*break*/, 3];
-                res.status(400).json({ success: false, message: "Invalid category_ids parameter" });
-                return [4 /*yield*/, connection.end()];
+                connection = _e.sent();
+                return [4 /*yield*/, connection.query("SELECT p.product_id, p.product_name, p.price, p.stock, p.image_url, p.description,\n              b.category_id, c.name AS category_name\n       FROM products p\n       LEFT JOIN belongs b ON p.product_id = b.product_id\n       LEFT JOIN categories c ON b.category_id = c.category_id\n       ORDER BY p.product_id")];
             case 2:
-                _h.sent();
-                return [2 /*return*/];
+                _a = __read.apply(void 0, [_e.sent(), 1]), rows = _a[0];
+                rawRows = Array.isArray(rows) ? rows : [];
+                baseUrl = "".concat(req.protocol, "://").concat(req.get("host"));
+                productsMap = new Map();
+                try {
+                    for (_b = __values(rawRows), _c = _b.next(); !_c.done; _c = _b.next()) {
+                        row = _c.value;
+                        imageUrl = row.image_url || "";
+                        if (imageUrl && !imageUrl.startsWith("http")) {
+                            imageUrl = imageUrl.replace(/^\.\.\//, "").replace(/^kepek\//, "");
+                            imageUrl = "".concat(baseUrl, "/kepek/").concat(imageUrl);
+                        }
+                        if (!productsMap.has(row.product_id)) {
+                            productsMap.set(row.product_id, {
+                                product_id: row.product_id,
+                                product_name: row.product_name,
+                                price: row.price,
+                                stock: row.stock,
+                                description: row.description,
+                                image_url: imageUrl,
+                                category_ids: [],
+                                category_names: []
+                            });
+                        }
+                        if (row.category_id) {
+                            product = productsMap.get(row.product_id);
+                            product.category_ids.push(row.category_id);
+                            product.category_names.push(row.category_name);
+                        }
+                    }
+                }
+                catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                finally {
+                    try {
+                        if (_c && !_c.done && (_d = _b.return)) _d.call(_b);
+                    }
+                    finally { if (e_2) throw e_2.error; }
+                }
+                items = Array.from(productsMap.values());
+                res.json({ items: items });
+                return [4 /*yield*/, connection.end()];
             case 3:
-                categoryNameParam = ((_d = req.query) === null || _d === void 0 ? void 0 : _d.category_names) || ((_e = req.body) === null || _e === void 0 ? void 0 : _e.category_names) || ((_f = req.query) === null || _f === void 0 ? void 0 : _f.category) || ((_g = req.body) === null || _g === void 0 ? void 0 : _g.category);
-                categoryNames = [];
-                if (!categoryNameParam) return [3 /*break*/, 5];
-                if (typeof categoryNameParam === "string") {
-                    categoryNames = categoryNameParam.split(",").map(function (s) { return s.trim(); }).filter(function (s) { return s.length > 0; });
-                }
-                else if (Array.isArray(categoryNameParam)) {
-                    categoryNames = categoryNameParam.map(function (s) { return String(s).trim(); }).filter(function (s) { return s.length > 0; });
-                }
-                else {
-                    categoryNames = [String(categoryNameParam).trim()].filter(function (s) { return s.length > 0; });
-                }
-                if (!(categoryNameParam && categoryNames.length === 0)) return [3 /*break*/, 5];
-                res.status(400).json({ success: false, message: "Invalid category_names parameter" });
-                return [4 /*yield*/, connection.end()];
+                _e.sent();
+                return [3 /*break*/, 5];
             case 4:
-                _h.sent();
-                return [2 /*return*/];
-            case 5:
-                query = "SELECT p.product_id, p.product_name, p.price, p.stock, p.image_url FROM products p";
-                whereClauses = [];
-                params = [];
-                if (categoryIds.length > 0 || categoryNames.length > 0) {
-                    query += " JOIN belongs b ON p.product_id = b.product_id JOIN categories c ON b.category_id = c.category_id";
-                    if (categoryIds.length > 0) {
-                        whereClauses.push("b.category_id IN (" + categoryIds.map(function () { return "?"; }).join(",") + ")");
-                        params.push.apply(params, __spreadArray([], __read(categoryIds), false));
-                    }
-                    if (categoryNames.length > 0) {
-                        whereClauses.push("c.name IN (" + categoryNames.map(function () { return "?"; }).join(",") + ")");
-                        params.push.apply(params, __spreadArray([], __read(categoryNames), false));
-                    }
-                    query += " WHERE (" + whereClauses.join(" OR ") + ") GROUP BY p.product_id";
-                }
-                return [4 /*yield*/, connection.query(query, params)];
-            case 6:
-                _a = __read.apply(void 0, [_h.sent(), 1]), rows = _a[0];
-                items = Array.isArray(rows) ? rows : [];
-                baseUrl_1 = "".concat(req.protocol, "://").concat(req.get("host"));
-                normalizedItems = items.map(function (item) {
-                    var imageUrl = (item === null || item === void 0 ? void 0 : item.image_url) || "";
-                    if (!imageUrl.startsWith("http")) {
-                        imageUrl = imageUrl.replace(/^\.\.\//, "").replace(/^kepek\//, "");
-                        imageUrl = "".concat(baseUrl_1, "/kepek/").concat(imageUrl);
-                    }
-                    return __assign(__assign({}, item), { image_url: imageUrl });
-                });
-                res.json({ items: normalizedItems });
-                return [4 /*yield*/, connection.end()];
-            case 7:
-                _h.sent();
-                return [3 /*break*/, 9];
-            case 8:
-                error_4 = _h.sent();
+                error_4 = _e.sent();
                 console.error("Get items error:", error_4);
                 res.status(500).json({ success: false, message: "Internal server error", error: error_4.message });
-                return [3 /*break*/, 9];
-            case 9: return [2 /*return*/];
+                return [3 /*break*/, 5];
+            case 5: return [2 /*return*/];
         }
     });
 }); };
-exports.getItemsByCategories = getItemsByCategories;
+exports.getAllItems = getAllItems;
 var getItemById = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var connection, idParam, productId, _a, rows, items, baseUrl, item, imageUrl, error_5;
     return __generator(this, function (_b) {
@@ -461,20 +436,23 @@ var getItemById = function (req, res) { return __awaiter(void 0, void 0, void 0,
 }); };
 exports.getItemById = getItemById;
 var addItem = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var connection, _a, product_name, price, stock, image_url, category_ids, parsedPrice, parsedStock, categoryIds, _b, result, productId_1, values, params_1, error_6;
+    var connection, _a, product_name, price, stock, category_ids, file, parsedPrice, parsedStock, categoryIds, _b, result, productId_1, ext, kepekDir, newFileName, imageUrl, values, params_1, error_6;
     return __generator(this, function (_c) {
         switch (_c.label) {
             case 0:
                 connection = null;
                 _c.label = 1;
             case 1:
-                _c.trys.push([1, 14, 17, 20]);
+                _c.trys.push([1, 17, 20, 23]);
                 return [4 /*yield*/, promise_1.default.createConnection(config_1.default.database)];
             case 2:
                 connection = _c.sent();
-                _a = req.body, product_name = _a.product_name, price = _a.price, stock = _a.stock, image_url = _a.image_url, category_ids = _a.category_ids;
-                if (!(!product_name || price === undefined || stock === undefined || !image_url)) return [3 /*break*/, 4];
-                res.status(400).json({ success: false, message: "product_name, price, stock, image_url are required" });
+                _a = req.body, product_name = _a.product_name, price = _a.price, stock = _a.stock, category_ids = _a.category_ids;
+                file = req.file;
+                if (!(!product_name || price === undefined || stock === undefined || !file)) return [3 /*break*/, 4];
+                res.status(400).json({ success: false, message: "product_name, price, stock, and image file are required" });
+                if (file)
+                    fs_1.default.unlinkSync(file.path);
                 return [4 /*yield*/, connection.end()];
             case 3:
                 _c.sent();
@@ -484,6 +462,7 @@ var addItem = function (req, res) { return __awaiter(void 0, void 0, void 0, fun
                 parsedStock = Number(stock);
                 if (!(!Number.isFinite(parsedPrice) || parsedPrice < 0 || !Number.isFinite(parsedStock) || parsedStock < 0)) return [3 /*break*/, 6];
                 res.status(400).json({ success: false, message: "price and stock must be non-negative numbers" });
+                fs_1.default.unlinkSync(file.path);
                 return [4 /*yield*/, connection.end()];
             case 5:
                 _c.sent();
@@ -502,6 +481,7 @@ var addItem = function (req, res) { return __awaiter(void 0, void 0, void 0, fun
                 }
                 if (!(category_ids !== undefined && categoryIds.length === 0)) return [3 /*break*/, 8];
                 res.status(400).json({ success: false, message: "Invalid category_ids" });
+                fs_1.default.unlinkSync(file.path);
                 return [4 /*yield*/, connection.end()];
             case 7:
                 _c.sent();
@@ -509,48 +489,65 @@ var addItem = function (req, res) { return __awaiter(void 0, void 0, void 0, fun
             case 8: return [4 /*yield*/, connection.beginTransaction()];
             case 9:
                 _c.sent();
-                return [4 /*yield*/, connection.query("INSERT INTO products (product_name, price, stock, image_url) VALUES (?, ?, ?, ?)", [product_name, parsedPrice, parsedStock, image_url])];
+                return [4 /*yield*/, connection.query("INSERT INTO products (product_name, price, stock, image_url) VALUES (?, ?, ?, ?)", [product_name, parsedPrice, parsedStock, ""])];
             case 10:
                 _b = __read.apply(void 0, [_c.sent(), 1]), result = _b[0];
                 productId_1 = result.insertId;
-                if (!(categoryIds.length > 0)) return [3 /*break*/, 12];
+                ext = path_1.default.extname(file.originalname) || ".png";
+                kepekDir = path_1.default.resolve(__dirname, "..", "..", "kepek");
+                newFileName = "".concat(productId_1).concat(ext);
+                return [4 /*yield*/, fs_1.default.promises.copyFile(file.path, path_1.default.join(kepekDir, newFileName))];
+            case 11:
+                _c.sent();
+                return [4 /*yield*/, fs_1.default.promises.unlink(file.path)];
+            case 12:
+                _c.sent();
+                imageUrl = "../kepek/".concat(newFileName);
+                return [4 /*yield*/, connection.query("UPDATE products SET image_url = ? WHERE product_id = ?", [imageUrl, productId_1])];
+            case 13:
+                _c.sent();
+                if (!(categoryIds.length > 0)) return [3 /*break*/, 15];
                 values = categoryIds.map(function () { return "(?, ?)"; }).join(", ");
                 params_1 = [];
                 categoryIds.forEach(function (categoryId) {
                     params_1.push(categoryId, productId_1);
                 });
                 return [4 /*yield*/, connection.query("INSERT INTO belongs (category_id, product_id) VALUES ".concat(values), params_1)];
-            case 11:
+            case 14:
                 _c.sent();
-                _c.label = 12;
-            case 12: return [4 /*yield*/, connection.commit()];
-            case 13:
+                _c.label = 15;
+            case 15: return [4 /*yield*/, connection.commit()];
+            case 16:
                 _c.sent();
                 res.status(201).json({
                     success: true,
                     message: "Item added successfully",
                     product_id: productId_1,
+                    image_url: imageUrl,
                 });
-                return [3 /*break*/, 20];
-            case 14:
-                error_6 = _c.sent();
-                if (!connection) return [3 /*break*/, 16];
-                return [4 /*yield*/, connection.rollback()];
-            case 15:
-                _c.sent();
-                _c.label = 16;
-            case 16:
-                console.error("Add item error:", error_6);
-                res.status(500).json({ success: false, message: "Internal server error", error: error_6.message });
-                return [3 /*break*/, 20];
+                return [3 /*break*/, 23];
             case 17:
+                error_6 = _c.sent();
                 if (!connection) return [3 /*break*/, 19];
-                return [4 /*yield*/, connection.end()];
+                return [4 /*yield*/, connection.rollback()];
             case 18:
                 _c.sent();
                 _c.label = 19;
-            case 19: return [7 /*endfinally*/];
-            case 20: return [2 /*return*/];
+            case 19:
+                if (req.file && fs_1.default.existsSync(req.file.path)) {
+                    fs_1.default.unlinkSync(req.file.path);
+                }
+                console.error("Add item error:", error_6);
+                res.status(500).json({ success: false, message: "Internal server error", error: error_6.message });
+                return [3 /*break*/, 23];
+            case 20:
+                if (!connection) return [3 /*break*/, 22];
+                return [4 /*yield*/, connection.end()];
+            case 21:
+                _c.sent();
+                _c.label = 22;
+            case 22: return [7 /*endfinally*/];
+            case 23: return [2 /*return*/];
         }
     });
 }); };
@@ -920,7 +917,7 @@ var deleteCategory = function (req, res) { return __awaiter(void 0, void 0, void
 }); };
 exports.deleteCategory = deleteCategory;
 var getUserRole = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var nev, connection, _a, role, e_2;
+    var nev, connection, _a, role, e_3;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -935,8 +932,8 @@ var getUserRole = function (req, res) { return __awaiter(void 0, void 0, void 0,
                 res.send(role[0]);
                 return [3 /*break*/, 4];
             case 3:
-                e_2 = _b.sent();
-                console.error(e_2);
+                e_3 = _b.sent();
+                console.error(e_3);
                 return [3 /*break*/, 4];
             case 4: return [2 /*return*/];
         }
@@ -944,11 +941,7 @@ var getUserRole = function (req, res) { return __awaiter(void 0, void 0, void 0,
 }); };
 exports.getUserRole = getUserRole;
 var createOrder = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-<<<<<<< HEAD
     var connection, userId, _a, result, orderId, error_12;
-=======
-    var connection, userId, _a, result, orderId, error_11;
->>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -967,15 +960,9 @@ var createOrder = function (req, res) { return __awaiter(void 0, void 0, void 0,
                 res.status(201).json({ success: true, message: "Order created successfully", orderId: orderId });
                 return [3 /*break*/, 8];
             case 4:
-<<<<<<< HEAD
                 error_12 = _b.sent();
                 console.error("Create order error:", error_12);
                 res.status(500).json({ success: false, message: "Internal server error", error: error_12.message });
-=======
-                error_11 = _b.sent();
-                console.error("Create order error:", error_11);
-                res.status(500).json({ success: false, message: "Internal server error", error: error_11.message });
->>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
                 return [3 /*break*/, 8];
             case 5:
                 if (!connection) return [3 /*break*/, 7];
@@ -990,60 +977,65 @@ var createOrder = function (req, res) { return __awaiter(void 0, void 0, void 0,
 }); };
 exports.createOrder = createOrder;
 var addToCart = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-<<<<<<< HEAD
-    var connection, _a, orderId, productId, quantity, error_13;
-=======
-    var connection, _a, orderId, productId, quantity, error_12;
->>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
-    return __generator(this, function (_b) {
-        switch (_b.label) {
+    var connection, _a, productId, quantity, userId, _b, productRow, price, subtotal, _c, orders, orderId, _d, newOrder, error_13;
+    var _e, _f;
+    return __generator(this, function (_g) {
+        switch (_g.label) {
             case 0:
                 connection = null;
-                _b.label = 1;
+                _g.label = 1;
             case 1:
-                _b.trys.push([1, 4, 5, 8]);
+                _g.trys.push([1, 9, 10, 13]);
                 return [4 /*yield*/, promise_1.default.createConnection(config_1.default.database)];
             case 2:
-                connection = _b.sent();
-                _a = req.body, orderId = _a.orderId, productId = _a.productId, quantity = _a.quantity;
-                if (!orderId || !productId || !quantity) {
-                    res.status(400).json({ success: false, message: "Order ID, product ID, and quantity are required" });
+                connection = _g.sent();
+                _a = req.body, productId = _a.productId, quantity = _a.quantity;
+                userId = ((_e = req.user) === null || _e === void 0 ? void 0 : _e.user_id) || ((_f = req.user) === null || _f === void 0 ? void 0 : _f.id);
+                return [4 /*yield*/, connection.query("SELECT price FROM products WHERE product_id = ?", [productId])];
+            case 3:
+                _b = __read.apply(void 0, [_g.sent(), 1]), productRow = _b[0];
+                if (productRow.length === 0) {
+                    res.status(404).json({ success: false, message: "Termék nem található" });
                     return [2 /*return*/];
                 }
-                return [4 /*yield*/, connection.query("INSERT INTO order_items (order_id, product_id, quantity) VALUES (?, ?, ?)", [orderId, productId, quantity])];
-            case 3:
-                _b.sent();
-                res.status(201).json({ success: true, message: "Item added to cart successfully" });
-                return [3 /*break*/, 8];
+                price = productRow[0].price;
+                subtotal = price * quantity;
+                return [4 /*yield*/, connection.query("SELECT order_id FROM orders WHERE user_id = ? AND status = 'in_progress' LIMIT 1", [userId])];
             case 4:
-<<<<<<< HEAD
-                error_13 = _b.sent();
-                console.error("Add to cart error:", error_13);
-                res.status(500).json({ success: false, message: "Internal server error", error: error_13.message });
-=======
-                error_12 = _b.sent();
-                console.error("Add to cart error:", error_12);
-                res.status(500).json({ success: false, message: "Internal server error", error: error_12.message });
->>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
-                return [3 /*break*/, 8];
-            case 5:
-                if (!connection) return [3 /*break*/, 7];
-                return [4 /*yield*/, connection.end()];
+                _c = __read.apply(void 0, [_g.sent(), 1]), orders = _c[0];
+                orderId = void 0;
+                if (!(orders.length > 0)) return [3 /*break*/, 5];
+                orderId = orders[0].order_id;
+                return [3 /*break*/, 7];
+            case 5: return [4 /*yield*/, connection.query("INSERT INTO orders (user_id, status, total_price, created_at) VALUES (?, 'in_progress', 0, ?)", [userId, new Date().toISOString().slice(0, 10)])];
             case 6:
-                _b.sent();
-                _b.label = 7;
-            case 7: return [7 /*endfinally*/];
-            case 8: return [2 /*return*/];
+                _d = __read.apply(void 0, [_g.sent(), 1]), newOrder = _d[0];
+                orderId = newOrder.insertId;
+                _g.label = 7;
+            case 7: return [4 /*yield*/, connection.query("INSERT INTO order_items (order_id, product_id, quantity, subtotal) \n             VALUES (?, ?, ?, ?) \n             ON DUPLICATE KEY UPDATE \n                quantity = quantity + VALUES(quantity), \n                subtotal = subtotal + VALUES(subtotal)", [orderId, productId, quantity, subtotal])];
+            case 8:
+                _g.sent();
+                res.json({ success: true, message: "A kosár frissítve!" });
+                return [3 /*break*/, 13];
+            case 9:
+                error_13 = _g.sent();
+                console.error(error_13);
+                res.status(500).json({ success: false, error: error_13.message });
+                return [3 /*break*/, 13];
+            case 10:
+                if (!connection) return [3 /*break*/, 12];
+                return [4 /*yield*/, connection.end()];
+            case 11:
+                _g.sent();
+                _g.label = 12;
+            case 12: return [7 /*endfinally*/];
+            case 13: return [2 /*return*/];
         }
     });
 }); };
 exports.addToCart = addToCart;
 var updateCartItem = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-<<<<<<< HEAD
     var connection, _a, orderId, productId, quantity, parsedQuantity, _b, result, error_14;
-=======
-    var connection, _a, orderId, productId, quantity, parsedQuantity, _b, result, error_13;
->>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
     return __generator(this, function (_c) {
         switch (_c.label) {
             case 0:
@@ -1074,15 +1066,9 @@ var updateCartItem = function (req, res) { return __awaiter(void 0, void 0, void
                 res.json({ success: true, message: "Cart item updated successfully" });
                 return [3 /*break*/, 8];
             case 4:
-<<<<<<< HEAD
                 error_14 = _c.sent();
                 console.error("Update cart item error:", error_14);
                 res.status(500).json({ success: false, message: "Internal server error", error: error_14.message });
-=======
-                error_13 = _c.sent();
-                console.error("Update cart item error:", error_13);
-                res.status(500).json({ success: false, message: "Internal server error", error: error_13.message });
->>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
                 return [3 /*break*/, 8];
             case 5:
                 if (!connection) return [3 /*break*/, 7];
@@ -1097,64 +1083,60 @@ var updateCartItem = function (req, res) { return __awaiter(void 0, void 0, void
 }); };
 exports.updateCartItem = updateCartItem;
 var deleteCartItem = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-<<<<<<< HEAD
-    var connection, _a, orderId, productId, _b, result, error_15;
-=======
-    var connection, _a, orderId, productId, _b, result, error_14;
->>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
-    return __generator(this, function (_c) {
-        switch (_c.label) {
+    var connection, productId, userId, _a, orders, orderId, _b, result, error_15;
+    var _c, _d;
+    return __generator(this, function (_e) {
+        switch (_e.label) {
             case 0:
                 connection = null;
-                _c.label = 1;
+                _e.label = 1;
             case 1:
-                _c.trys.push([1, 4, 5, 8]);
+                _e.trys.push([1, 5, 6, 9]);
                 return [4 /*yield*/, promise_1.default.createConnection(config_1.default.database)];
             case 2:
-                connection = _c.sent();
-                _a = req.body, orderId = _a.orderId, productId = _a.productId;
-                if (!orderId || !productId) {
-                    res.status(400).json({ success: false, message: "Order ID and product ID are required" });
+                connection = _e.sent();
+                productId = req.body.productId;
+                userId = ((_c = req.user) === null || _c === void 0 ? void 0 : _c.user_id) || ((_d = req.user) === null || _d === void 0 ? void 0 : _d.id);
+                if (!productId || !userId) {
+                    res.status(400).json({ success: false, message: "Hiányzó adatok" });
                     return [2 /*return*/];
                 }
-                return [4 /*yield*/, connection.query("DELETE FROM order_items WHERE order_id = ? AND product_id = ?", [orderId, productId])];
+                return [4 /*yield*/, connection.query("SELECT order_id FROM orders WHERE user_id = ? AND status = 'in_progress' LIMIT 1", [userId])];
             case 3:
-                _b = __read.apply(void 0, [_c.sent(), 1]), result = _b[0];
-                if (result.affectedRows === 0) {
-                    res.status(404).json({ success: false, message: "Cart item not found" });
+                _a = __read.apply(void 0, [_e.sent(), 1]), orders = _a[0];
+                if (orders.length === 0) {
+                    res.status(404).json({ success: false, message: "Nincs aktív kosár" });
                     return [2 /*return*/];
                 }
-                res.json({ success: true, message: "Cart item deleted successfully" });
-                return [3 /*break*/, 8];
+                orderId = orders[0].order_id;
+                return [4 /*yield*/, connection.query("DELETE FROM order_items WHERE order_id = ? AND product_id = ?", [orderId, productId])];
             case 4:
-<<<<<<< HEAD
-                error_15 = _c.sent();
-                console.error("Delete cart item error:", error_15);
-                res.status(500).json({ success: false, message: "Internal server error", error: error_15.message });
-=======
-                error_14 = _c.sent();
-                console.error("Delete cart item error:", error_14);
-                res.status(500).json({ success: false, message: "Internal server error", error: error_14.message });
->>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
-                return [3 /*break*/, 8];
+                _b = __read.apply(void 0, [_e.sent(), 1]), result = _b[0];
+                if (result.affectedRows === 0) {
+                    res.status(404).json({ success: false, message: "A termék nincs a kosárban" });
+                    return [2 /*return*/];
+                }
+                res.json({ success: true, message: "Termék eltávolítva a kosárból" });
+                return [3 /*break*/, 9];
             case 5:
-                if (!connection) return [3 /*break*/, 7];
-                return [4 /*yield*/, connection.end()];
+                error_15 = _e.sent();
+                console.error("Delete error:", error_15);
+                res.status(500).json({ success: false, error: error_15.message });
+                return [3 /*break*/, 9];
             case 6:
-                _c.sent();
-                _c.label = 7;
-            case 7: return [7 /*endfinally*/];
-            case 8: return [2 /*return*/];
+                if (!connection) return [3 /*break*/, 8];
+                return [4 /*yield*/, connection.end()];
+            case 7:
+                _e.sent();
+                _e.label = 8;
+            case 8: return [7 /*endfinally*/];
+            case 9: return [2 /*return*/];
         }
     });
 }); };
 exports.deleteCartItem = deleteCartItem;
 var updateOrderStatus = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-<<<<<<< HEAD
     var connection, _a, orderId, status, trimmedStatus, _b, result, error_16;
-=======
-    var connection, _a, orderId, status, trimmedStatus, _b, result, error_15;
->>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
     return __generator(this, function (_c) {
         switch (_c.label) {
             case 0:
@@ -1185,15 +1167,9 @@ var updateOrderStatus = function (req, res) { return __awaiter(void 0, void 0, v
                 res.json({ success: true, message: "Order status updated successfully" });
                 return [3 /*break*/, 8];
             case 4:
-<<<<<<< HEAD
                 error_16 = _c.sent();
                 console.error("Update order status error:", error_16);
                 res.status(500).json({ success: false, message: "Internal server error", error: error_16.message });
-=======
-                error_15 = _c.sent();
-                console.error("Update order status error:", error_15);
-                res.status(500).json({ success: false, message: "Internal server error", error: error_15.message });
->>>>>>> 2baa07e95b734ab24c41ed56f54013d1a759bd74
                 return [3 /*break*/, 8];
             case 5:
                 if (!connection) return [3 /*break*/, 7];
@@ -1207,3 +1183,134 @@ var updateOrderStatus = function (req, res) { return __awaiter(void 0, void 0, v
     });
 }); };
 exports.updateOrderStatus = updateOrderStatus;
+var getCart = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var connection, userId, _a, orders, orderId, _b, items, baseUrl_1, normalizedItems, error_17;
+    var _c, _d;
+    return __generator(this, function (_e) {
+        switch (_e.label) {
+            case 0:
+                connection = null;
+                _e.label = 1;
+            case 1:
+                _e.trys.push([1, 5, 6, 9]);
+                return [4 /*yield*/, promise_1.default.createConnection(config_1.default.database)];
+            case 2:
+                connection = _e.sent();
+                userId = ((_c = req.user) === null || _c === void 0 ? void 0 : _c.user_id) || ((_d = req.user) === null || _d === void 0 ? void 0 : _d.id);
+                if (!userId) {
+                    res.status(401).json({ success: false, message: "Nincs bejelentkezve felhasználó" });
+                    return [2 /*return*/];
+                }
+                return [4 /*yield*/, connection.query("SELECT order_id FROM orders WHERE user_id = ? AND status = 'in_progress' LIMIT 1", [userId])];
+            case 3:
+                _a = __read.apply(void 0, [_e.sent(), 1]), orders = _a[0];
+                if (orders.length === 0) {
+                    res.json({ success: true, items: [] });
+                    return [2 /*return*/];
+                }
+                orderId = orders[0].order_id;
+                return [4 /*yield*/, connection.query("SELECT p.product_id, p.product_name, p.price, p.description, p.image_url, oi.quantity \n             FROM order_items oi \n             JOIN products p ON oi.product_id = p.product_id \n             WHERE oi.order_id = ?", [orderId])];
+            case 4:
+                _b = __read.apply(void 0, [_e.sent(), 1]), items = _b[0];
+                baseUrl_1 = "".concat(req.protocol, "://").concat(req.get("host"));
+                normalizedItems = items.map(function (item) {
+                    var imageUrl = (item === null || item === void 0 ? void 0 : item.image_url) || "";
+                    if (imageUrl && !imageUrl.startsWith("http")) {
+                        imageUrl = imageUrl.replace(/^\.\.\//, "").replace(/^kepek\//, "");
+                        imageUrl = "".concat(baseUrl_1, "/kepek/").concat(imageUrl);
+                    }
+                    return __assign(__assign({}, item), { image_url: imageUrl });
+                });
+                res.json({ success: true, items: normalizedItems });
+                return [3 /*break*/, 9];
+            case 5:
+                error_17 = _e.sent();
+                console.error("Hiba a getCart-ban:", error_17.message);
+                res.status(500).json({ success: false, error: error_17.message });
+                return [3 /*break*/, 9];
+            case 6:
+                if (!connection) return [3 /*break*/, 8];
+                return [4 /*yield*/, connection.end()];
+            case 7:
+                _e.sent();
+                _e.label = 8;
+            case 8: return [7 /*endfinally*/];
+            case 9: return [2 /*return*/];
+        }
+    });
+}); };
+exports.getCart = getCart;
+var getAllOrders = function (_req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var connection, _a, rows, error_18;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                connection = null;
+                _b.label = 1;
+            case 1:
+                _b.trys.push([1, 4, 5, 8]);
+                return [4 /*yield*/, promise_1.default.createConnection(config_1.default.database)];
+            case 2:
+                connection = _b.sent();
+                return [4 /*yield*/, connection.query("SELECT o.order_id, o.user_id, u.username, o.status, o.created_at,\n                    COALESCE(SUM(oi.subtotal), 0) AS total_price\n             FROM orders o\n             JOIN users u ON o.user_id = u.user_id\n             LEFT JOIN order_items oi ON o.order_id = oi.order_id\n             GROUP BY o.order_id\n             ORDER BY o.order_id")];
+            case 3:
+                _a = __read.apply(void 0, [_b.sent(), 1]), rows = _a[0];
+                res.json({ success: true, orders: rows });
+                return [3 /*break*/, 8];
+            case 4:
+                error_18 = _b.sent();
+                console.error("Get all orders error:", error_18.message);
+                res.status(500).json({ success: false, message: "Internal server error", error: error_18.message });
+                return [3 /*break*/, 8];
+            case 5:
+                if (!connection) return [3 /*break*/, 7];
+                return [4 /*yield*/, connection.end()];
+            case 6:
+                _b.sent();
+                _b.label = 7;
+            case 7: return [7 /*endfinally*/];
+            case 8: return [2 /*return*/];
+        }
+    });
+}); };
+exports.getAllOrders = getAllOrders;
+var getOrdersByUser = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var connection, userId, _a, rows, error_19;
+    var _b, _c;
+    return __generator(this, function (_d) {
+        switch (_d.label) {
+            case 0:
+                connection = null;
+                _d.label = 1;
+            case 1:
+                _d.trys.push([1, 4, 5, 8]);
+                return [4 /*yield*/, promise_1.default.createConnection(config_1.default.database)];
+            case 2:
+                connection = _d.sent();
+                userId = ((_b = req.user) === null || _b === void 0 ? void 0 : _b.user_id) || ((_c = req.user) === null || _c === void 0 ? void 0 : _c.id);
+                if (!userId) {
+                    res.status(401).json({ success: false, message: "Nincs bejelentkezve felhasználó" });
+                    return [2 /*return*/];
+                }
+                return [4 /*yield*/, connection.query("SELECT o.order_id, o.user_id, u.username, o.status, o.created_at,\n                    COALESCE(SUM(oi.subtotal), 0) AS total_price\n             FROM orders o\n             JOIN users u ON o.user_id = u.user_id\n             LEFT JOIN order_items oi ON o.order_id = oi.order_id\n             WHERE o.user_id = ?\n             GROUP BY o.order_id\n             ORDER BY o.order_id", [userId])];
+            case 3:
+                _a = __read.apply(void 0, [_d.sent(), 1]), rows = _a[0];
+                res.json({ success: true, orders: rows });
+                return [3 /*break*/, 8];
+            case 4:
+                error_19 = _d.sent();
+                console.error("Get orders by user error:", error_19.message);
+                res.status(500).json({ success: false, message: "Internal server error", error: error_19.message });
+                return [3 /*break*/, 8];
+            case 5:
+                if (!connection) return [3 /*break*/, 7];
+                return [4 /*yield*/, connection.end()];
+            case 6:
+                _d.sent();
+                _d.label = 7;
+            case 7: return [7 /*endfinally*/];
+            case 8: return [2 /*return*/];
+        }
+    });
+}); };
+exports.getOrdersByUser = getOrdersByUser;
