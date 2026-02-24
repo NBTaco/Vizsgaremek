@@ -1,7 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import path from "path";
-import { getCart, addCategory, addItem, addToCart, createOrder, deleteCartItem, deleteCategory, deleteItem, getCategories, getItemById, getAllItems, getUserRole, loginUser, registerUser, run, updateCartItem, updateItem, updateOrderStatus, userSettings } from "./controller";
+import { getCart, addCategory, addItem, addToCart, createOrder, deleteCartItem, deleteCategory, deleteItem, getCategories, getItemById, getAllItems, getAllOrders, getOrdersByUser, getUserRole, loginUser, registerUser, run, updateCartItem, updateItem, updateOrderStatus, userSettings } from "./controller";
 import verifyToken, { requireAdmin } from "../middleware/auth"
 
 const upload = multer({ dest: path.resolve(__dirname, "..", "..", "kepek", "tmp") });
@@ -31,5 +31,7 @@ router.patch("/cart/items", verifyToken, updateCartItem)
 router.delete("/cart/items", verifyToken, deleteCartItem)
 router.patch("/orders/status", verifyToken, updateOrderStatus)
 router.get("/cart", verifyToken, getCart);
+router.get("/orders", verifyToken, requireAdmin, getAllOrders);
+router.get("/orders/user", verifyToken, getOrdersByUser);
 
 export default router;
