@@ -231,6 +231,29 @@ ALTER TABLE `users`
   MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 COMMIT;
 
+-- --------------------------------------------------------
+
+--
+-- Függvény: Total_Price
+-- Visszaadja egy rendelés összes tételének összesített árát
+--
+
+DELIMITER $$
+
+CREATE FUNCTION `Total_Price`(p_order_id INT)
+RETURNS INT
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+  DECLARE v_total INT;
+  SELECT COALESCE(SUM(subtotal), 0) INTO v_total
+    FROM order_items
+    WHERE order_id = p_order_id;
+  RETURN v_total;
+END$$
+
+DELIMITER ;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
