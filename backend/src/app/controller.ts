@@ -17,3 +17,4 @@ export { getCart } from "./controllers/getCart";
 export { updateOrderStatus } from "./controllers/updateOrderStatus";
 export { getAllOrders } from "./controllers/getAllOrders";
 export { getOrdersByUser } from "./controllers/getOrdersByUser";
+export { placeOrder } from "./controllers/placeOrder";
