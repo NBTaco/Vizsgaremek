@@ -7,7 +7,19 @@ export const getUserRole = async (req: Request, res: Response): Promise<void> =>
   try {
     connection = await mysql.createConnection(config.database);
     const nev = req.params.username;
-    const [role]: any = await connection.query("SELECT users.role FROM users WHERE users.username = ?", [nev]);
+
+    if (!nev || typeof nev !== "string" || nev.trim().length === 0 || nev.trim().length > 50) {
+      res.status(400).json({ success: false, message: "Invalid username parameter" });
+      return;
+    }
+
+    const [role]: any = await connection.query("SELECT users.role FROM users WHERE users.username = ?", [nev.trim()]);
+
+    if (!role || role.length === 0) {
+      res.status(404).json({ success: false, message: "User not found" });
+      return;
+    }
+
     res.send(role[0]);
   } catch (e) {
     console.error(e);

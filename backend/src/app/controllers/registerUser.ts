@@ -27,10 +27,35 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
+    if (typeof email !== "string" || typeof password !== "string") {
+      res.status(400).json({
+        success: false,
+        message: "Email and password must be strings",
+      });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid email format",
+      });
+      return;
+    }
+
     if (password.length < 6) {
       res.status(400).json({
         success: false,
         message: "Password must be at least 6 characters long",
+      });
+      return;
+    }
+
+    if (username !== undefined && (typeof username !== "string" || username.trim().length === 0 || username.trim().length > 50)) {
+      res.status(400).json({
+        success: false,
+        message: "Username must be a non-empty string (max 50 characters)",
       });
       return;
     }

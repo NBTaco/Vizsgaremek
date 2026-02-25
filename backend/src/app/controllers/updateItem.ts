@@ -23,8 +23,13 @@ export const updateItem = async (req: Request, res: Response): Promise<void> => 
     const params: any[] = [];
 
     if (product_name !== undefined) {
+      if (typeof product_name !== "string" || product_name.trim().length === 0 || product_name.trim().length > 200) {
+        if (file) fs.unlinkSync(file.path);
+        res.status(400).json({ success: false, message: "product_name must be a non-empty string (max 200 characters)" });
+        return;
+      }
       updates.push("product_name = ?");
-      params.push(product_name);
+      params.push(product_name.trim());
     }
 
     if (price !== undefined) {
@@ -40,9 +45,9 @@ export const updateItem = async (req: Request, res: Response): Promise<void> => 
 
     if (stock !== undefined) {
       const parsedStock = Number(stock);
-      if (!Number.isFinite(parsedStock) || parsedStock < 0) {
+      if (!Number.isFinite(parsedStock) || parsedStock < 0 || !Number.isInteger(parsedStock)) {
         if (file) fs.unlinkSync(file.path);
-        res.status(400).json({ success: false, message: "stock must be a non-negative number" });
+        res.status(400).json({ success: false, message: "stock must be a non-negative integer" });
         return;
       }
       updates.push("stock = ?");

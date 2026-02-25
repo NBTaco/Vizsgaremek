@@ -41,7 +41,7 @@ export const getCart = async (req: any, res: Response): Promise<void> => {
       image_url: normalizeImageUrl(item?.image_url, baseUrl),
     }));
 
-    res.json({ success: true, items: normalizedItems });
+    res.json({ success: true, orderId, items: normalizedItems });
 
   } catch (error: any) {
     console.error("Hiba a getCart-ban:", error.message);

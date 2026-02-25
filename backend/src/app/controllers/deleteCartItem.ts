@@ -9,8 +9,14 @@ export const deleteCartItem = async (req: any, res: Response): Promise<void> => 
     const { productId } = req.body;
     const userId = req.user?.user_id || req.user?.id;
 
-    if (!productId || !userId) {
-      res.status(400).json({ success: false, message: "Hiányzó adatok" });
+    if (!userId) {
+      res.status(401).json({ success: false, message: "User not authenticated" });
+      return;
+    }
+
+    const parsedProductId = Number(productId);
+    if (!Number.isFinite(parsedProductId) || parsedProductId <= 0 || !Number.isInteger(parsedProductId)) {
+      res.status(400).json({ success: false, message: "Product ID must be a positive integer" });
       return;
     }
 
@@ -28,7 +34,7 @@ export const deleteCartItem = async (req: any, res: Response): Promise<void> => 
 
     const [result]: any = await connection.query(
       "DELETE FROM order_items WHERE order_id = ? AND product_id = ?",
-      [orderId, productId]
+      [orderId, parsedProductId]
     );
 
     if (result.affectedRows === 0) {

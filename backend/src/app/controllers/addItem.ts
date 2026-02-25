@@ -18,11 +18,25 @@ export const addItem = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    if (typeof product_name !== "string" || product_name.trim().length === 0 || product_name.trim().length > 200) {
+      res.status(400).json({ success: false, message: "product_name must be a non-empty string (max 200 characters)" });
+      fs.unlinkSync(file.path);
+      await connection.end();
+      return;
+    }
+
     const parsedPrice = Number(price);
     const parsedStock = Number(stock);
 
-    if (!Number.isFinite(parsedPrice) || parsedPrice < 0 || !Number.isFinite(parsedStock) || parsedStock < 0) {
-      res.status(400).json({ success: false, message: "price and stock must be non-negative numbers" });
+    if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+      res.status(400).json({ success: false, message: "price must be a non-negative number" });
+      fs.unlinkSync(file.path);
+      await connection.end();
+      return;
+    }
+
+    if (!Number.isFinite(parsedStock) || parsedStock < 0 || !Number.isInteger(parsedStock)) {
+      res.status(400).json({ success: false, message: "stock must be a non-negative integer" });
       fs.unlinkSync(file.path);
       await connection.end();
       return;
@@ -50,7 +64,7 @@ export const addItem = async (req: Request, res: Response): Promise<void> => {
 
     const [result] = await connection.query(
       "INSERT INTO products (product_name, price, stock, image_url) VALUES (?, ?, ?, ?)",
-      [product_name, parsedPrice, parsedStock, ""]
+      [product_name.trim(), parsedPrice, parsedStock, ""]
     );
 
     const productId = (result as any).insertId;

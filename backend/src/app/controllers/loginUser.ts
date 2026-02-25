@@ -18,6 +18,23 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    if (typeof email !== "string" || typeof password !== "string") {
+      res.status(400).json({
+        success: false,
+        message: "Email and password must be strings",
+      });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid email format",
+      });
+      return;
+    }
+
     const [users] = await connection.query("SELECT user_id, email, password_hash, username, role FROM users WHERE email = ?", [
       email,
     ]);

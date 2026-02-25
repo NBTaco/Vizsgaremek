@@ -8,15 +8,38 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
     connection = await mysql.createConnection(config.database);
     const { orderId, status, billing_name, billing_phone, billing_country, billing_zip, billing_city, billing_address } = req.body;
 
-    if (!orderId || !status || typeof status !== "string") {
-      res.status(400).json({ success: false, message: "Order ID and status are required" });
+    const parsedOrderId = Number(orderId);
+    if (!Number.isFinite(parsedOrderId) || parsedOrderId <= 0 || !Number.isInteger(parsedOrderId)) {
+      res.status(400).json({ success: false, message: "Order ID must be a positive integer" });
+      return;
+    }
+
+    if (!status || typeof status !== "string") {
+      res.status(400).json({ success: false, message: "Status is required and must be a string" });
       return;
     }
 
     const trimmedStatus = status.trim();
-    if (trimmedStatus.length === 0) {
-      res.status(400).json({ success: false, message: "Status must be a non-empty string" });
+    const validStatuses = ["in_progress", "ordered", "shipped", "delivered", "cancelled"];
+    if (!validStatuses.includes(trimmedStatus)) {
+      res.status(400).json({ success: false, message: `Status must be one of: ${validStatuses.join(", ")}` });
       return;
+    }
+
+    if (billing_name !== undefined) {
+      if (typeof billing_name !== "string" || typeof billing_phone !== "string" ||
+          typeof billing_country !== "string" || typeof billing_zip !== "string" ||
+          typeof billing_city !== "string" || typeof billing_address !== "string") {
+        res.status(400).json({ success: false, message: "All billing fields must be strings" });
+        return;
+      }
+
+      if (billing_name.trim().length === 0 || billing_phone.trim().length === 0 ||
+          billing_country.trim().length === 0 || billing_zip.trim().length === 0 ||
+          billing_city.trim().length === 0 || billing_address.trim().length === 0) {
+        res.status(400).json({ success: false, message: "All billing fields are required when placing an order" });
+        return;
+      }
     }
 
     let query = "UPDATE orders SET status = ?";
@@ -28,7 +51,7 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
     }
 
     query += " WHERE order_id = ?";
-    params.push(orderId);
+    params.push(parsedOrderId);
 
     const [result] = await connection.query(query, params);
 

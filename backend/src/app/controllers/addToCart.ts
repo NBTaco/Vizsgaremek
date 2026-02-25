@@ -9,13 +9,25 @@ export const addToCart = async (req: any, res: Response): Promise<void> => {
     const { productId, quantity } = req.body;
     const userId = req.user?.user_id || req.user?.id;
 
-    const parsedQuantity = Number(quantity);
-    if (!productId || !Number.isFinite(parsedQuantity) || parsedQuantity <= 0) {
-      res.status(400).json({ success: false, message: "Product ID and a positive quantity are required" });
+    if (!userId) {
+      res.status(401).json({ success: false, message: "User not authenticated" });
       return;
     }
 
-    const [productRow]: any = await connection.query("SELECT price FROM products WHERE product_id = ?", [productId]);
+    const parsedProductId = Number(productId);
+    const parsedQuantity = Number(quantity);
+
+    if (!Number.isFinite(parsedProductId) || parsedProductId <= 0 || !Number.isInteger(parsedProductId)) {
+      res.status(400).json({ success: false, message: "Product ID must be a positive integer" });
+      return;
+    }
+
+    if (!Number.isFinite(parsedQuantity) || parsedQuantity <= 0 || !Number.isInteger(parsedQuantity)) {
+      res.status(400).json({ success: false, message: "Quantity must be a positive integer" });
+      return;
+    }
+
+    const [productRow]: any = await connection.query("SELECT price FROM products WHERE product_id = ?", [parsedProductId]);
     if (productRow.length === 0) {
       res.status(404).json({ success: false, message: "Termék nem található" });
       return;
@@ -46,7 +58,7 @@ export const addToCart = async (req: any, res: Response): Promise<void> => {
        ON DUPLICATE KEY UPDATE 
           quantity = quantity + VALUES(quantity), 
           subtotal = subtotal + VALUES(subtotal)`,
-      [orderId, productId, parsedQuantity, subtotal]
+      [orderId, parsedProductId, parsedQuantity, subtotal]
     );
 
     await connection.query(

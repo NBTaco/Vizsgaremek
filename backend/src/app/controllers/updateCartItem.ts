@@ -9,14 +9,20 @@ export const updateCartItem = async (req: any, res: Response): Promise<void> => 
     const { productId, quantity } = req.body;
     const userId = req.user?.user_id || req.user?.id;
 
-    if (!productId || quantity === undefined) {
-      res.status(400).json({ success: false, message: "Product ID and quantity are required" });
+    if (!userId) {
+      res.status(401).json({ success: false, message: "User not authenticated" });
+      return;
+    }
+
+    const parsedProductId = Number(productId);
+    if (!Number.isFinite(parsedProductId) || parsedProductId <= 0 || !Number.isInteger(parsedProductId)) {
+      res.status(400).json({ success: false, message: "Product ID must be a positive integer" });
       return;
     }
 
     const parsedQuantity = Number(quantity);
-    if (!Number.isFinite(parsedQuantity) || parsedQuantity <= 0) {
-      res.status(400).json({ success: false, message: "Quantity must be a positive number" });
+    if (!Number.isFinite(parsedQuantity) || parsedQuantity <= 0 || !Number.isInteger(parsedQuantity)) {
+      res.status(400).json({ success: false, message: "Quantity must be a positive integer" });
       return;
     }
 
@@ -34,7 +40,7 @@ export const updateCartItem = async (req: any, res: Response): Promise<void> => 
 
     const [priceRow]: any = await connection.query(
       "SELECT price FROM products WHERE product_id = ?",
-      [productId]
+      [parsedProductId]
     );
 
     if (priceRow.length === 0) {
@@ -46,7 +52,7 @@ export const updateCartItem = async (req: any, res: Response): Promise<void> => 
 
     const [result] = await connection.query(
       "UPDATE order_items SET quantity = ?, subtotal = ? WHERE order_id = ? AND product_id = ?",
-      [parsedQuantity, newSubtotal, orderId, productId]
+      [parsedQuantity, newSubtotal, orderId, parsedProductId]
     );
 
     if ((result as any).affectedRows === 0) {
