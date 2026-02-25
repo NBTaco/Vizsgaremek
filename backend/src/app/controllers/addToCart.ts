@@ -32,7 +32,9 @@ export const addToCart = async (req: any, res: Response): Promise<void> => {
       orderId = orders[0].order_id;
     } else {
       const [newOrder]: any = await connection.query(
-        "INSERT INTO orders (user_id, status, total_price, created_at) VALUES (?, 'in_progress', 0, ?)",
+        `INSERT INTO orders (user_id, status, total_price, created_at,
+         billing_name, billing_phone, billing_country, billing_zip, billing_city, billing_address)
+         VALUES (?, 'in_progress', 0, ?, '', '', '', '', '', '')`,
         [userId, new Date().toISOString().slice(0, 10)]
       );
       orderId = newOrder.insertId;
@@ -45,6 +47,13 @@ export const addToCart = async (req: any, res: Response): Promise<void> => {
           quantity = quantity + VALUES(quantity), 
           subtotal = subtotal + VALUES(subtotal)`,
       [orderId, productId, parsedQuantity, subtotal]
+    );
+
+    await connection.query(
+      `UPDATE orders SET total_price = (
+         SELECT COALESCE(SUM(subtotal), 0) FROM order_items WHERE order_id = ?
+       ) WHERE order_id = ?`,
+      [orderId, orderId]
     );
 
     res.json({ success: true, message: "A kosár frissítve!" });

@@ -6,7 +6,7 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
   let connection: mysql.Connection | null = null;
   try {
     connection = await mysql.createConnection(config.database);
-    const { orderId, status } = req.body;
+    const { orderId, status, billing_name, billing_phone, billing_country, billing_zip, billing_city, billing_address } = req.body;
 
     if (!orderId || !status || typeof status !== "string") {
       res.status(400).json({ success: false, message: "Order ID and status are required" });
@@ -19,10 +19,18 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    const [result] = await connection.query(
-      "UPDATE orders SET status = ? WHERE order_id = ?",
-      [trimmedStatus, orderId]
-    );
+    let query = "UPDATE orders SET status = ?";
+    const params: any[] = [trimmedStatus];
+
+    if (billing_name !== undefined) {
+      query += ", billing_name = ?, billing_phone = ?, billing_country = ?, billing_zip = ?, billing_city = ?, billing_address = ?";
+      params.push(billing_name, billing_phone, billing_country, billing_zip, billing_city, billing_address);
+    }
+
+    query += " WHERE order_id = ?";
+    params.push(orderId);
+
+    const [result] = await connection.query(query, params);
 
     if ((result as any).affectedRows === 0) {
       res.status(404).json({ success: false, message: "Order not found" });

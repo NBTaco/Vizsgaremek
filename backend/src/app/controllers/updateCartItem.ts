@@ -54,6 +54,13 @@ export const updateCartItem = async (req: any, res: Response): Promise<void> => 
       return;
     }
 
+    await connection.query(
+      `UPDATE orders SET total_price = (
+         SELECT COALESCE(SUM(subtotal), 0) FROM order_items WHERE order_id = ?
+       ) WHERE order_id = ?`,
+      [orderId, orderId]
+    );
+
     res.json({ success: true, message: "Cart item updated successfully" });
   } catch (error) {
     console.error("Update cart item error:", error);

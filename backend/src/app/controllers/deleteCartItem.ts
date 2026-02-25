@@ -36,6 +36,13 @@ export const deleteCartItem = async (req: any, res: Response): Promise<void> => 
       return;
     }
 
+    await connection.query(
+      `UPDATE orders SET total_price = (
+         SELECT COALESCE(SUM(subtotal), 0) FROM order_items WHERE order_id = ?
+       ) WHERE order_id = ?`,
+      [orderId, orderId]
+    );
+
     res.json({ success: true, message: "Termék eltávolítva a kosárból" });
   } catch (error: any) {
     console.error("Delete error:", error);

@@ -3,14 +3,13 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2026. Feb 13. 17:35
+-- Létrehozás ideje: 2026. Feb 25. 14:36
 -- Kiszolgáló verziója: 10.4.32-MariaDB
 -- PHP verzió: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
-
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -32,22 +31,9 @@ CREATE TABLE `belongs` (
   `product_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- A tábla adatainak kiíratása `belongs`
---
-
 INSERT INTO `belongs` (`category_id`, `product_id`) VALUES
-(2, 1),
-(2, 2),
-(1, 3),
-(2, 4),
-(2, 5),
-(1, 6),
-(2, 7),
-(2, 8),
-(1, 9),
-(1, 10),
-(1, 11);
+(2, 1),(2, 2),(1, 3),(2, 4),(2, 5),
+(1, 6),(2, 7),(2, 8),(1, 9),(1, 10),(1, 11);
 
 -- --------------------------------------------------------
 
@@ -60,10 +46,6 @@ CREATE TABLE `categories` (
   `name` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- A tábla adatainak kiíratása `categories`
---
-
 INSERT INTO `categories` (`category_id`, `name`) VALUES
 (1, 'power tools'),
 (2, 'simple tools');
@@ -72,23 +54,25 @@ INSERT INTO `categories` (`category_id`, `name`) VALUES
 
 --
 -- Tábla szerkezet ehhez a táblához `orders`
+-- Számlázási adatokkal bővítve
 --
 
 CREATE TABLE `orders` (
-  `order_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `total_price` int(11) NOT NULL DEFAULT 0,
-  `status` varchar(50) NOT NULL,
-  `created_at` varchar(10) DEFAULT '2026-02-13'
+  `order_id`          int(11)      NOT NULL,
+  `user_id`           int(11)      NOT NULL,
+  `total_price`       int(11)      NOT NULL DEFAULT 0,
+  `status`            varchar(50)  NOT NULL DEFAULT 'in_progress',
+  `created_at`        varchar(10)  NOT NULL,
+
+  -- Számlázási adatok
+  `billing_name`      varchar(255) NOT NULL,
+  `billing_phone`     varchar(30)  NOT NULL,
+  `billing_country`   varchar(100) NOT NULL,
+  `billing_zip`       varchar(20)  NOT NULL,
+  `billing_city`      varchar(100) NOT NULL,
+  `billing_address`   varchar(255) NOT NULL
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- A tábla adatainak kiíratása `orders`
---
-
-INSERT INTO `orders` (`order_id`, `user_id`, `total_price`, `status`, `created_at`) VALUES
-(1, 5, 0, 'in_progress', ''),
-(2, 1, 0, 'in_progress', '2026-02-13');
 
 -- --------------------------------------------------------
 
@@ -97,19 +81,11 @@ INSERT INTO `orders` (`order_id`, `user_id`, `total_price`, `status`, `created_a
 --
 
 CREATE TABLE `order_items` (
-  `order_id` int(11) NOT NULL,
+  `order_id`   int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
-  `quantity` int(11) NOT NULL,
-  `subtotal` int(11) NOT NULL
+  `quantity`   int(11) NOT NULL,
+  `subtotal`   int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- A tábla adatainak kiíratása `order_items`
---
-
-INSERT INTO `order_items` (`order_id`, `product_id`, `quantity`, `subtotal`) VALUES
-(1, 8, 1, 7000),
-(2, 3, 1, 4500);
 
 -- --------------------------------------------------------
 
@@ -118,30 +94,26 @@ INSERT INTO `order_items` (`order_id`, `product_id`, `quantity`, `subtotal`) VAL
 --
 
 CREATE TABLE `products` (
-  `product_id` int(11) NOT NULL,
+  `product_id`   int(11)      NOT NULL,
   `product_name` varchar(255) NOT NULL,
-  `price` int(11) NOT NULL,
-  `stock` int(11) NOT NULL,
-  `description` text NOT NULL,
-  `image_url` varchar(255) NOT NULL
+  `price`        int(11)      NOT NULL,
+  `stock`        int(11)      NOT NULL,
+  `description`  text         NOT NULL,
+  `image_url`    varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- A tábla adatainak kiíratása `products`
---
-
 INSERT INTO `products` (`product_id`, `product_name`, `price`, `stock`, `description`, `image_url`) VALUES
-(1, 'Bitfejkészlet', 6999, 2, 'Professzionális 32 részes készlet strapabíró S2 acélból, minden típusú csavarozási feladathoz.', '../kepek/1.png'),
-(2, 'Csavarhúzó', 6750, 6, 'Mágneses hegyű, ergonomikus markolatú csavarhúzó készlet a kényelmes és precíz munkavégzésért.', '../kepek/2.png'),
-(3, 'Csavarozógép', 4500, 4, 'Könnyű és kompakt akkumulátoros csavarozó, beépített LED világítással a sötét sarkokhoz.', '../kepek/3.png'),
-(4, 'Gumikalapács', 3000, 5, 'Kíméletes ütéseket biztosító szerszám, ideális burkoláshoz és bútor összeszereléshez.', '../kepek/4.png'),
-(5, 'Kalapács', 1500, 6, 'Klasszikus acélfejű kalapács rezgéscsillapító nyéllel, ház körüli munkákhoz elengedhetetlen.', '../kepek/5.png'),
-(6, 'Korfűrész', 10000, 7, 'Nagy teljesítményű körfűrész precíz vágásokhoz, állítható dőlésszöggel és mélységgel.', '../kepek/6.png'),
-(7, 'Pajszer', 12300, 8, 'Edzett acél feszítővas, amely a legnehezebb bontási munkálatok során sem hagy cserben.', '../kepek/7.png'),
-(8, 'Racsni', 7000, 3, 'Finomfogazású kilincsműves kulcs, amely szűk helyeken is hatékony munkát tesz lehetővé.', '../kepek/8.png'),
-(9, 'Sarokcsiszoló', 6500, 2, 'Sokoldalú szerszám vágáshoz és csiszoláshoz, biztonsági védőburkolattal és pótfogantyúval.', '../kepek/9.png'),
-(10, 'Vésőgép', 5400, 4, 'Nagy ütőerejű elektromos vésőgép beton és téglafalak bontásához, SDS-Plus befogóval.', '../kepek/10.png'),
-(11, 'Csiszológép', 12300, 1, 'Excenteres csiszoló porelszívó tartállyal a tökéletesen sima fafelületek eléréséhez.', '../kepek/11.png');
+(1,  'Bitfejkészlet',  6999,  2, 'Professzionális 32 részes készlet strapabíró S2 acélból, minden típusú csavarozási feladathoz.', '../kepek/1.png'),
+(2,  'Csavarhúzó',     6750,  6, 'Mágneses hegyű, ergonomikus markolatú csavarhúzó készlet a kényelmes és precíz munkavégzésért.', '../kepek/2.png'),
+(3,  'Csavarozógép',   4500,  4, 'Könnyű és kompakt akkumulátoros csavarozó, beépített LED világítással a sötét sarkokhoz.', '../kepek/3.png'),
+(4,  'Gumikalapács',   3000,  5, 'Kíméletes ütéseket biztosító szerszám, ideális burkoláshoz és bútor összeszereléshez.', '../kepek/4.png'),
+(5,  'Kalapács',       1500,  6, 'Klasszikus acélfejű kalapács rezgéscsillapító nyéllel, ház körüli munkákhoz elengedhetetlen.', '../kepek/5.png'),
+(6,  'Korfűrész',     10000,  7, 'Nagy teljesítményű körfűrész precíz vágásokhoz, állítható dőlésszöggel és mélységgel.', '../kepek/6.png'),
+(7,  'Pajszer',       12300,  8, 'Edzett acél feszítővas, amely a legnehezebb bontási munkálatok során sem hagy cserben.', '../kepek/7.png'),
+(8,  'Racsni',         7000,  3, 'Finomfogazású kilincsműves kulcs, amely szűk helyeken is hatékony munkát tesz lehetővé.', '../kepek/8.png'),
+(9,  'Sarokcsiszoló',  6500,  2, 'Sokoldalú szerszám vágáshoz és csiszoláshoz, biztonsági védőburkolattal és pótfogantyúval.', '../kepek/9.png'),
+(10, 'Vésőgép',        5400,  4, 'Nagy ütőerejű elektromos vésőgép beton és téglafalak bontásához, SDS-Plus befogóval.', '../kepek/10.png'),
+(11, 'Csiszológép',   12300,  1, 'Excenteres csiszoló porelszívó tartállyal a tökéletesen sima fafelületek eléréséhez.', '../kepek/11.png');
 
 -- --------------------------------------------------------
 
@@ -150,109 +122,75 @@ INSERT INTO `products` (`product_id`, `product_name`, `price`, `stock`, `descrip
 --
 
 CREATE TABLE `users` (
-  `user_id` int(11) NOT NULL,
-  `username` varchar(50) DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL,
+  `user_id`       int(11)      NOT NULL,
+  `username`      varchar(50)  DEFAULT NULL,
+  `email`         varchar(255) DEFAULT NULL,
   `password_hash` varchar(255) DEFAULT NULL,
-  `role` varchar(50) DEFAULT NULL
+  `role`          varchar(50)  DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- A tábla adatainak kiíratása `users`
---
-
 INSERT INTO `users` (`user_id`, `username`, `email`, `password_hash`, `role`) VALUES
-(1, 'admin', 'admin@gmail.com', '$2a$10$ObQGeonWFnh1OjnBAtLk/eOnmqW4f04CM7.APuBNMXFy0jWT4fNIq', 'admin'),
-(5, 'nandi', 'gtanandika04@gmail.com', '$2b$10$Q5qUuJm1VnirgI4TwYJKL.bfOmhYfihfzO8UGVw.E6HsaEniYVfX6', 'user');
+(1, 'admin', 'admin@gmail.com', '$2a$10$ObQGeonWFnh1OjnBAtLk/eOnmqW4f04CM7.APuBNMXFy0jWT4fNIq', 'admin');
 
---
--- Indexek a kiírt táblákhoz
---
+-- --------------------------------------------------------
+-- Indexek
+-- --------------------------------------------------------
 
---
--- A tábla indexei `categories`
---
+ALTER TABLE `belongs`
+  ADD PRIMARY KEY (`category_id`, `product_id`);
+
 ALTER TABLE `categories`
   ADD PRIMARY KEY (`category_id`);
 
---
--- A tábla indexei `orders`
---
 ALTER TABLE `orders`
-  ADD PRIMARY KEY (`order_id`);
+  ADD PRIMARY KEY (`order_id`),
+  ADD KEY `fk_orders_user` (`user_id`);
 
---
--- A tábla indexei `order_items`
---
 ALTER TABLE `order_items`
-  ADD UNIQUE KEY `unique_order_product` (`order_id`,`product_id`);
+  ADD PRIMARY KEY (`order_id`, `product_id`),
+  ADD KEY `fk_order_items_product` (`product_id`);
 
---
--- A tábla indexei `products`
---
 ALTER TABLE `products`
   ADD PRIMARY KEY (`product_id`);
 
---
--- A tábla indexei `users`
---
 ALTER TABLE `users`
   ADD PRIMARY KEY (`user_id`),
   ADD UNIQUE KEY `username` (`username`),
   ADD UNIQUE KEY `email` (`email`),
   ADD UNIQUE KEY `password_hash` (`password_hash`);
 
---
--- A kiírt táblák AUTO_INCREMENT értéke
---
+-- --------------------------------------------------------
+-- AUTO_INCREMENT
+-- --------------------------------------------------------
 
---
--- AUTO_INCREMENT a táblához `categories`
---
 ALTER TABLE `categories`
   MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
---
--- AUTO_INCREMENT a táblához `orders`
---
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT a táblához `products`
---
 ALTER TABLE `products`
   MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
---
--- AUTO_INCREMENT a táblához `users`
---
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-COMMIT;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 -- --------------------------------------------------------
+-- Külső kulcsok
+-- --------------------------------------------------------
 
---
--- Függvény: Total_Price
--- Visszaadja egy rendelés összes tételének összesített árát
---
+ALTER TABLE `belongs`
+  ADD CONSTRAINT `fk_belongs_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`),
+  ADD CONSTRAINT `fk_belongs_product`  FOREIGN KEY (`product_id`)  REFERENCES `products`   (`product_id`);
 
-DELIMITER $$
+ALTER TABLE `orders`
+  ADD CONSTRAINT `fk_orders_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
 
-CREATE FUNCTION `Total_Price`(p_order_id INT)
-RETURNS INT
-DETERMINISTIC
-READS SQL DATA
-BEGIN
-  DECLARE v_total INT;
-  SELECT COALESCE(SUM(subtotal), 0) INTO v_total
-    FROM order_items
-    WHERE order_id = p_order_id;
-  RETURN v_total;
-END$$
+ALTER TABLE `order_items`
+  ADD CONSTRAINT `fk_order_items_order`   FOREIGN KEY (`order_id`)   REFERENCES `orders`   (`order_id`),
+  ADD CONSTRAINT `fk_order_items_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`);
 
-DELIMITER ;
+COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

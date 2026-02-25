@@ -16,7 +16,9 @@ export const getOrdersByUser = async (req: any, res: Response): Promise<void> =>
 
     const [rows]: any = await connection.query(
       `SELECT o.order_id, o.user_id, u.username, o.status, o.created_at,
-              COALESCE(SUM(oi.subtotal), 0) AS total_price
+              COALESCE(SUM(oi.subtotal), 0) AS total_price,
+              o.billing_name, o.billing_phone, o.billing_country,
+              o.billing_zip, o.billing_city, o.billing_address
        FROM orders o
        JOIN users u ON o.user_id = u.user_id
        LEFT JOIN order_items oi ON o.order_id = oi.order_id
