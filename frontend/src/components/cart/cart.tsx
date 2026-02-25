@@ -3,18 +3,23 @@ import Header from "../header/Header";
 import Footer from "../footer/Footer";
 import Title from "../title/title";
 import "./cart.css";
+import { useNavigate } from "react-router-dom";
 
 export default function Cart() {
   const [items, setItems] = useState<any[]>([]);
   const token = localStorage.getItem("token");
 
+  const navigate = useNavigate();
+
   const fetchCart = async () => {
     try {
       const res = await fetch("http://localhost:3000/cart", {
-        headers: { "x-access-token": token || "" }
+        headers: { "x-access-token": token || "" },
       });
       const data = await res.json();
-      
+
+      localStorage.setItem("orderId", data.orderId);
+
       if (data.success) {
         setItems(data.items);
       }
@@ -29,33 +34,39 @@ export default function Cart() {
   }, []);
 
   const handleDelete = async (productId: number) => {
-  const token = localStorage.getItem("token");
-  if (!token) return;
+    const token = localStorage.getItem("token");
+    if (!token) return;
 
-  try {
-    const res = await fetch("http://localhost:3000/cart/items", {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        "x-access-token": token 
-      },
-      body: JSON.stringify({ productId }) 
-    });
+    try {
+      const res = await fetch("http://localhost:3000/cart/items", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": token,
+        },
+        body: JSON.stringify({ productId }),
+      });
 
-    const data = await res.json();
-    if (data.success) {
-      fetchCart(); 
-    } else {
-      alert("Hiba: " + data.message);
+      const data = await res.json();
+      if (data.success) {
+        fetchCart();
+      } else {
+        alert("Hiba: " + data.message);
+      }
+    } catch (e) {
+      console.error("Hiba a törlés során:", e);
     }
-  } catch (e) {
-    console.error("Hiba a törlés során:", e);
-  }
-};
+  };
 
-  const total = items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+  const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
-  if (!token) return <div className="cart-msg">A kosár megtekintéséhez be kell jelentkezned.</div>;
+  if (!token)
+    return (
+      <div className="cart-msg">
+        Az oldal megtekintéséhez be kell jelentkezned. <br></br>
+        <button onClick={() => navigate("/")}>Vissza a föoldalra</button>
+      </div>
+    );
 
   return (
     <>
@@ -73,25 +84,40 @@ export default function Cart() {
             items.map((item) => (
               <div className="cart-row" key={item.product_id}>
                 <div className="i-cell product-info">
-                  <img src={item.image_url} alt={item.product_name} className="cart-img" />
+                  <img
+                    src={item.image_url}
+                    alt={item.product_name}
+                    className="cart-img"
+                  />
                   <div className="name-and-del">
                     <span>{item.product_name}</span>
                   </div>
                 </div>
                 <div className="i-cell">{item.price.toLocaleString()} Ft</div>
                 <div className="i-cell">{item.quantity} db</div>
-                 <button className="del-btn" onClick={() => handleDelete(item.product_id)}>🗑️</button>
+                <button
+                  className="del-btn"
+                  onClick={() => handleDelete(item.product_id)}
+                >
+                  🗑️
+                </button>
               </div>
             ))
           ) : (
-            <div className="empty-msg">{ "A kosarad jelenleg üres."}</div>
+            <div className="empty-msg">{"A kosarad jelenleg üres."}</div>
           )}
         </div>
 
         <div className="cart-summary-section">
           <div className="total-box">
-            <p><strong>Összesen:</strong> {total.toLocaleString()} Ft</p>
-            <button className="checkout-btn" disabled={items.length === 0}>
+            <p>
+              <strong>Összesen:</strong> {total.toLocaleString()} Ft
+            </p>
+            <button
+              className="checkout-btn"
+              disabled={items.length === 0}
+              onClick={() => navigate("/finalize")}
+            >
               Tovább a fizetéshez
             </button>
           </div>

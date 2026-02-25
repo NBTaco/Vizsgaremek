@@ -33,6 +33,7 @@ function Header({ user }: any) {
     localStorage.removeItem("user");
     localStorage.removeItem("username");
     localStorage.removeItem("token");
+    localStorage.removeItem("orderId");
       navigate("/");
   };
 
@@ -68,7 +69,7 @@ function Header({ user }: any) {
           <div className="dropdown">
             {loggedInUser && (
               <>
-                <a href="#">Profil ({loggedInUser.username})</a>
+                <a onClick={() => navigate("/profile")}>Profil ({loggedInUser.username})</a>
                 <a href="#" onClick={handleLogout}>Kijelentkezés</a>
               </>
             )}

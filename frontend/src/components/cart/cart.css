@@ -123,3 +123,10 @@
   padding: 40px;
   text-align: center;
 }
+
+.cart-msg {
+  padding: 40px;
+  text-align: center;
+  font-size: 30px;
+  color: #c0392b;
+}
