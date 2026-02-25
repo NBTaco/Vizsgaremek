@@ -1,0 +1,105 @@
+.edititem-modal {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  color: #000;
+}
+
+.edititem-box {
+  background: #c2c2c2;
+  width: 420px;
+  max-height: 90vh;
+  padding: 24px;
+  border-radius: 10px;
+  overflow-y: auto;
+}
+
+.edititem-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.edititem-close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.edititem-close:hover {
+  opacity: 0.7;
+}
+
+.edititem-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.edititem-content label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.edititem-content input {
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.category-list {
+  border: 1px solid #999;
+  padding: 10px;
+  max-height: 150px;
+  overflow-y: auto;
+  background-color: #e0e0e0;
+}
+
+.category-item {
+  display: flex;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.edititem-btn {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.edititem-btn:hover {
+  background-color: #004a99;
+}
+
+.edititem-current-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #aaa;
+}
+
+.error-text {
+  color: #d9534f;
+  font-size: 13px;
+}
+
+.success-text {
+  color: green;
+  font-size: 13px;
+}
