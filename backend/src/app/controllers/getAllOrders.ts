@@ -7,7 +7,7 @@ export const getAllOrders = async (_req: Request, res: Response): Promise<void> 
   try {
     connection = await mysql.createConnection(config.database);
 
-    const [rows]: any = await connection.query(
+    const [orderRows]: any = await connection.query(
       `SELECT o.order_id, o.user_id, u.username, o.status, o.created_at,
               COALESCE(SUM(oi.subtotal), 0) AS total_price,
               o.billing_name, o.billing_phone, o.billing_country,
@@ -19,7 +19,32 @@ export const getAllOrders = async (_req: Request, res: Response): Promise<void> 
        ORDER BY o.order_id`
     );
 
-    res.json({ success: true, orders: rows });
+    const orderIds = orderRows.map((o: any) => o.order_id);
+
+    let itemsByOrder: Record<number, any[]> = {};
+    if (orderIds.length > 0) {
+      const [itemRows]: any = await connection.query(
+        `SELECT oi.order_id, oi.product_id, p.product_name, p.price, oi.quantity, oi.subtotal
+         FROM order_items oi
+         JOIN products p ON oi.product_id = p.product_id
+         WHERE oi.order_id IN (${orderIds.map(() => "?").join(", ")})`,
+        orderIds
+      );
+
+      for (const item of itemRows) {
+        if (!itemsByOrder[item.order_id]) {
+          itemsByOrder[item.order_id] = [];
+        }
+        itemsByOrder[item.order_id].push(item);
+      }
+    }
+
+    const orders = orderRows.map((order: any) => ({
+      ...order,
+      items: itemsByOrder[order.order_id] || [],
+    }));
+
+    res.json({ success: true, orders });
   } catch (error: any) {
     console.error("Get all orders error:", error.message);
     res.status(500).json({ success: false, message: "Internal server error", error: error.message });

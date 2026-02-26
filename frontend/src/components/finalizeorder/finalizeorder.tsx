@@ -49,14 +49,12 @@ export default function FinalizeOrder() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Failed to finalize order: ${errorText}`);
+        throw new Error(errorText);
       }
 
-      const data = await response.json();
-      alert(data.message);
+      navigate("/profile");
     } catch (error) {
-      console.error("Error finalizing order:", error);
-      alert("Failed to finalize order. Please try again.");
+      console.error(error);
     }
   };
 

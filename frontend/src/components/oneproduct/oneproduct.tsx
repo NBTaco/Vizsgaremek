@@ -68,7 +68,7 @@ const OneProduct = () => {
   const handleAddToCart = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Kérlek, jelentkezz be a vásárláshoz!");
+      navigate("/login");
       return;
     }
 
@@ -87,7 +87,7 @@ const OneProduct = () => {
 
       const data = await response.json();
       if (data.success) {
-        alert("Termék sikeresen a kosárba került!");
+        navigate("/cart");
       } else {
         alert("Hiba: " + data.message);
       }
