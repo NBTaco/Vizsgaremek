@@ -34,7 +34,7 @@ export default function EditCategories({ onClose }: any) {
     try {
       const response = await fetch("http://localhost:3000/addcategory", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-access-token": localStorage.getItem("token") || "" },
         body: JSON.stringify({ name: categoryName.trim() }),
       });
 

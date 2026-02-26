@@ -66,8 +66,11 @@ export default function AddItem({ onClose }: any) {
         formData.append("category_ids", id.toString())
       );
 
-      const res = await fetch("http://localhost:3000/additem", {
+      const res = await fetch("http://localhost:3000/items", {
         method: "POST",
+        headers: {
+    "x-access-token": localStorage.getItem("token") || "",  
+  },
         body: formData,
       });
 
