@@ -1,11 +1,20 @@
 .product-card {
-  background-color: white;
+  background-color: #ffffff;
   border-radius: 12px;
-  padding: 5px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
   height: 100%;
-  color: #333;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.07);
+  transition: box-shadow 0.2s, transform 0.2s;
+  overflow: hidden;
+}
+
+.product-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
 }
 
 .product-image {
@@ -13,6 +22,11 @@
   height: 200px;
   overflow: hidden;
   border-radius: 8px;
+  background-color: #f9fafb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .product-image img {
@@ -22,34 +36,43 @@
 }
 
 .product-name {
-  margin: 15px 0;
-  font-size: 1.1rem;
+  margin: 14px 2px 6px;
+  font-size: 0.95rem;
   font-weight: 600;
   flex-grow: 1;
+  color: #111827;
+  line-height: 1.4;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
 }
 
 .product-price {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  color: #1a2a3a;
-  margin-bottom: 10px;
+  color: #0b3554;
+  margin-bottom: 12px;
+  padding: 0 2px;
 }
 
 .watch-button {
   display: flex;
   justify-content: flex-end;
+  margin-top: auto;
 }
 
 .watch-button button {
-  background-color: #1a2a3a;
+  background-color: #0b3554;
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 9px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.3s;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: background 0.2s;
 }
 
 .watch-button button:hover {
-  background-color: #34495e;
+  background-color: #0d4a73;
 }

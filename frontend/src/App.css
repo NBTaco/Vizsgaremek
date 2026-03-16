@@ -1,23 +1,51 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 html, body, #root {
   height: 100%;
   width: 100%;
   margin: 0;
   padding: 0;
-  min-height: 100%;
-  display: flex;  
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f0f4f7;
+  color: #111827;
+  min-height: 100vh;
+}
+
+#root {
+  display: flex;
   flex-direction: column;
-  background-color: #8cb0c7;
-  color: white;
+  min-height: 100vh;
+}
+
+.products-layout,
+.profile-container,
+.admin-orders-container,
+.cart-wrapper,
+.finalize-order,
+.product-page-container,
+.aboutus-card {
+  flex: 1;
+}
+
+footer {
+  margin-top: auto;
 }
 
 .main-content {
   flex: 1;
-  background-color: #e3c36b;
+  background-color: #f0f4f7;
 }
 
 .welcome {
   text-align: center;
-  margin-top: 20px;
-  font-family: 'Arial', sans-serif;
-  color: #000000;
+  margin-top: 32px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #0b3554;
+  letter-spacing: 0.5px;
 }

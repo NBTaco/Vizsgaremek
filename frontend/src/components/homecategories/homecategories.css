@@ -2,36 +2,54 @@
   display: flex;
   gap: 20px;
   justify-content: center;
-  padding: 40px 0;
+  padding: 36px 24px 48px;
+  flex-wrap: wrap;
 }
 
 .category-card {
-  width: 140px;
-  height: 180px;
-  background: #f2f0e8;
-  border-radius: 10px;
+  width: 148px;
+  min-height: 180px;
+  background: #ffffff;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 10px;
-  transition: transform 0.2s;
+  padding: 20px 12px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+  gap: 12px;
 }
 
 .category-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.13);
+}
+
+.category-card img,
+.category-card span {
+  font-size: 2.5rem;
+  text-align: center;
+}
+
+.category-button {
+  width: 100%;
 }
 
 .category-button button {
   width: 100%;
-  padding: 8px 8px;
-  background: #d9d7ce;
+  padding: 8px 10px;
+  background: #0b3554;
+  color: #ffffff;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: background 0.2s;
 }
 
 .category-button button:hover {
-  background: #c4c2ba;
+  background: #0d4a73;
 }

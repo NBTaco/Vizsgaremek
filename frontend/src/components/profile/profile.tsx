@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 
 export default function Profile() {
   const [ordersbyuser, setOrdersbyuser] = useState<any[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
 
   useEffect(() => {
     fetchOrders();
@@ -19,9 +20,7 @@ export default function Profile() {
           "x-access-token": localStorage.getItem("token") || "",
         },
       });
-
       const data = await response.json();
-
       if (response.ok) {
         setOrdersbyuser(data.orders);
       } else {
@@ -32,8 +31,8 @@ export default function Profile() {
     }
   }
 
-  console.log("Rendelések a felhasználóhoz:", ordersbyuser);
   const user = JSON.parse(localStorage.getItem("user") || "{}");
+
   return (
     <>
       <Header />
@@ -50,18 +49,37 @@ export default function Profile() {
             <p>Nincsenek rendeléseid.</p>
           ) : (
             ordersbyuser.map((order) => (
-              <OneOrder
-                key={order.order_id}
-                orderId={order.order_id}
-                createdAt={order.created_at}
-                status={order.status}
-                items={order.items}
-                total_price={order.total_price}
-              />
+              <div key={order.order_id} className="profile-order-card">
+                <div className="profile-order-card-info">
+                  <p className="profile-order-name">
+                    {user.username || "—"}
+                  </p>
+                  <p className="profile-order-date">{order.created_at}</p>
+                </div>
+                <button
+                  className="profile-order-view-btn"
+                  onClick={() => setSelectedOrder(order)}
+                >
+                  Megtekintés
+                </button>
+              </div>
             ))
           )}
         </div>
       </div>
+
+      {selectedOrder && (
+        <OneOrder
+          orderId={selectedOrder.order_id}
+          createdAt={selectedOrder.created_at}
+          status={selectedOrder.status}
+          items={selectedOrder.items}
+          total_price={selectedOrder.total_price}
+          isAdmin={false}
+          onClose={() => setSelectedOrder(null)}
+        />
+      )}
+
       <Footer />
     </>
   );

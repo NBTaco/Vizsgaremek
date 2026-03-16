@@ -18,6 +18,7 @@ type Props = {
   product: Product;
   onClose: () => void;
   onUpdated?: () => void;
+  onDeleted?: () => void;
 };
 
 type UpdatePayload = {
@@ -27,7 +28,7 @@ type UpdatePayload = {
   category_ids: number[];
 };
 
-export default function EditItem({ product, onClose, onUpdated }: Props) {
+export default function EditItem({ product, onClose, onUpdated, onDeleted }: Props) {
   const [productName, setProductName] = useState(product.product_name);
   const [price, setPrice] = useState(String(product.price));
   const [stock, setStock] = useState(String(product.stock));
@@ -39,6 +40,7 @@ export default function EditItem({ product, onClose, onUpdated }: Props) {
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -125,6 +127,36 @@ export default function EditItem({ product, onClose, onUpdated }: Props) {
     }
   };
 
+  const handleDelete = async () => {
+    if (!window.confirm(`Biztosan törlöd a(z) "${product.product_name}" terméket? Ez a művelet nem visszavonható.`)) return;
+
+    setDeleting(true);
+    setError("");
+
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://localhost:3000/items/${product.product_id}`, {
+        method: "DELETE",
+        headers: {
+          "x-access-token": token || "",
+        },
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        onDeleted?.();
+        onClose();
+      } else {
+        setError(data.message || "Nem sikerült törölni a terméket");
+        setDeleting(false);
+      }
+    } catch {
+      setError("Szerver hiba – nem sikerült törölni");
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="edititem-modal">
       <div className="edititem-box">
@@ -157,17 +189,24 @@ export default function EditItem({ product, onClose, onUpdated }: Props) {
           />
 
           <label>Kategóriák</label>
-          <div className="category-list">
-            {categories.map((cat) => (
-              <label key={cat.category_id} className="category-item">
-                <input
-                  type="checkbox"
-                  checked={selectedCategories.includes(cat.category_id)}
-                  onChange={() => toggleCategory(cat.category_id)}
-                />
-                {cat.name}
-              </label>
-            ))}
+          <div className="category-pills">
+            {categories.map((cat) => {
+              const isSelected = selectedCategories.includes(cat.category_id);
+              return (
+                <button
+                  key={cat.category_id}
+                  type="button"
+                  className={`category-pill${isSelected ? " category-pill--selected" : ""}`}
+                  onClick={() => toggleCategory(cat.category_id)}
+                >
+                  {isSelected && <span className="category-pill-check">✓</span>}
+                  {cat.name}
+                </button>
+              );
+            })}
+            {categories.length === 0 && (
+              <span className="category-pills-empty">Nincsenek kategóriák</span>
+            )}
           </div>
 
           {error && <div className="error-text">{error}</div>}
@@ -175,6 +214,16 @@ export default function EditItem({ product, onClose, onUpdated }: Props) {
 
           <button className="edititem-btn" onClick={handleSubmit}>
             Mentés
+          </button>
+
+          <div className="edititem-divider" />
+
+          <button
+            className="edititem-delete-btn"
+            onClick={handleDelete}
+            disabled={deleting}
+          >
+            {deleting ? "Törlés folyamatban..." : "Termék törlése"}
           </button>
         </div>
       </div>

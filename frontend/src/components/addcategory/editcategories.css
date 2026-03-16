@@ -6,38 +6,45 @@
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  color: #000000;
 }
 
 .addcategory-box {
-  background: #c2c2c2;
-  width: 420px;
+  background: #ffffff;
+  width: 440px;
   max-height: 90vh;
-  padding: 24px;
-  border-radius: 10px;
+  padding: 28px;
+  border-radius: 14px;
   overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  color: #111827;
 }
 
 .addcategory-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 20px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #0b3554;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 14px;
 }
 
 .addcategory-close {
   background: none;
   border: none;
-  font-size: 22px;
-  font-weight: bold;
+  font-size: 1.3rem;
   cursor: pointer;
-  color: #000000;
+  color: #6b7280;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
 }
 
 .addcategory-close:hover {
-  opacity: 0.7;
+  background: #f3f4f6;
+  color: #111827;
 }
 
 .addcategory-content {
@@ -47,81 +54,106 @@
 }
 
 .addcategory-content h4 {
-  margin: 10px 0 5px;
-  font-size: 16px;
+  margin: 10px 0 4px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #374151;
 }
 
 .addcategory-content label {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
 }
 
 .addcategory-content input {
-  padding: 10px;
-  font-size: 14px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  border: 1.5px solid #d1d5db;
   outline: none;
+  background-color: #f9fafb;
+  color: #111827;
+  transition: border-color 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.addcategory-content input:focus {
+  border-color: #0b3554;
+  background-color: #fff;
 }
 
 .error-text {
-  color: #d9534f;
-  font-size: 13px;
+  color: #ef4444;
+  font-size: 0.82rem;
 }
 
 .addcategory-btn {
-  margin-top: 10px;
-  padding: 10px;
-  background-color: #13a400;
+  margin-top: 6px;
+  padding: 11px;
+  background-color: #22c55e;
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 15px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
   cursor: pointer;
+  transition: background 0.2s;
 }
 
 .addcategory-btn:hover {
-  background-color: #2e6e00;
+  background-color: #16a34a;
 }
 
 .category-delete-section {
-  margin-top: 25px;
+  margin-top: 28px;
+  border-top: 2px solid #e5e7eb;
+  padding-top: 20px;
 }
 
 .category-delete-section h4 {
-  margin-bottom: 10px;
-  font-size: 16px;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #374151;
 }
 
 .category-table {
   width: 100%;
   border-collapse: collapse;
-  background-color: #e0e0e0;
 }
 
 .category-table th,
 .category-table td {
-  border: 1px solid #999;
-  padding: 8px;
-  font-size: 14px;
+  border: 1px solid #e5e7eb;
+  padding: 10px 12px;
+  font-size: 0.9rem;
 }
 
 .category-table th {
-  background-color: #b5b5b5;
+  background-color: #f3f4f6;
+  font-weight: 700;
+  color: #374151;
   text-align: left;
 }
 
+.category-table td {
+  color: #4b5563;
+}
+
 .delete-btn {
-  background-color: #d9534f;
+  background-color: #ef4444;
   color: #ffffff;
   border: none;
-  padding: 5px 10px;
-  border-radius: 5px;
+  padding: 6px 12px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: background 0.2s;
 }
 
 .delete-btn:hover {
-  opacity: 0.8;
+  background-color: #dc2626;
 }
-

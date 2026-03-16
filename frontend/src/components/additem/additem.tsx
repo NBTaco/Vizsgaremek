@@ -134,17 +134,24 @@ export default function AddItem({ onClose }: any) {
 
           <label>Kategóriák</label>
 
-          <div className="category-list">
-            {categories.map(cat => (
-              <label key={cat.category_id} className="category-item">
-                <input
-                  type="checkbox"
-                  checked={selectedCategories.includes(cat.category_id)}
-                  onChange={() => toggleCategory(cat.category_id)}
-                />
-                {cat.name}
-              </label>
-            ))}
+          <div className="category-pills">
+            {categories.map(cat => {
+              const isSelected = selectedCategories.includes(cat.category_id);
+              return (
+                <button
+                  key={cat.category_id}
+                  type="button"
+                  className={`category-pill${isSelected ? " category-pill--selected" : ""}`}
+                  onClick={() => toggleCategory(cat.category_id)}
+                >
+                  {isSelected && <span className="category-pill-check">✓</span>}
+                  {cat.name}
+                </button>
+              );
+            })}
+            {categories.length === 0 && (
+              <span className="category-pills-empty">Nincsenek kategóriák</span>
+            )}
           </div>
 
           {error && <div className="error-text">{error}</div>}

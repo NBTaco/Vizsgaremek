@@ -55,13 +55,17 @@ export default function EditCategories({ onClose }: any) {
   };
 
   const deleteCategory = async (categoryId: number) => {
+    const token = localStorage.getItem("token")
     if (!window.confirm("Biztosan törlöd ezt a kategóriát?")) return;
 
     try {
       const response = await fetch(
         `http://localhost:3000/deletecategory/${categoryId}`,
         {
-          method: "POST",
+          method: "DELETE",
+          headers: {
+          "x-access-token": token || "",
+        },
         }
       );
 

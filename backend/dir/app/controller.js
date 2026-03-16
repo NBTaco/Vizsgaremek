@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOrdersByUser = exports.getAllOrders = exports.updateOrderStatus = exports.getCart = exports.deleteCartItem = exports.updateCartItem = exports.addToCart = exports.deleteCategory = exports.addCategory = exports.getCategories = exports.deleteItem = exports.updateItem = exports.addItem = exports.getItemById = exports.getAllItems = exports.getUserRole = exports.userSettings = exports.loginUser = exports.registerUser = void 0;
+exports.placeOrder = exports.getOrdersByUser = exports.getAllOrders = exports.updateOrderStatus = exports.getCart = exports.deleteCartItem = exports.updateCartItem = exports.addToCart = exports.deleteCategory = exports.addCategory = exports.getCategories = exports.deleteItem = exports.updateItem = exports.addItem = exports.getItemById = exports.getAllItems = exports.getUserRole = exports.userSettings = exports.loginUser = exports.registerUser = void 0;
 var registerUser_1 = require("./controllers/registerUser");
 Object.defineProperty(exports, "registerUser", { enumerable: true, get: function () { return registerUser_1.registerUser; } });
 var loginUser_1 = require("./controllers/loginUser");
@@ -39,3 +39,5 @@ var getAllOrders_1 = require("./controllers/getAllOrders");
 Object.defineProperty(exports, "getAllOrders", { enumerable: true, get: function () { return getAllOrders_1.getAllOrders; } });
 var getOrdersByUser_1 = require("./controllers/getOrdersByUser");
 Object.defineProperty(exports, "getOrdersByUser", { enumerable: true, get: function () { return getOrdersByUser_1.getOrdersByUser; } });
+var placeOrder_1 = require("./controllers/placeOrder");
+Object.defineProperty(exports, "placeOrder", { enumerable: true, get: function () { return placeOrder_1.placeOrder; } });

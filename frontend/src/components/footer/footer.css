@@ -1,37 +1,45 @@
 .footer {
   width: 100%;
   margin-top: auto;
+  flex-shrink: 0;
 }
 
 .footer-top {
   background-color: #667575;
   display: flex;
   justify-content: space-around;
-  padding: 60px 40px;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding: 40px 48px;
   color: white;
 }
 
 .footer-col h3 {
-  font-size: 28px;
-  margin-bottom: 10px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 10px;
+  color: #e3c36b;
 }
 
 .footer-col p {
-  font-size: 16px;
-  margin: 2px 0;
+  font-size: 0.9rem;
+  margin: 4px 0;
+  color: #d1d5db;
+  line-height: 1.6;
 }
 
 .footer-bottom {
   background-color: #0f3d52;
-  height: 100px;
+  height: 64px;
   display: flex;
   align-items: center;
-  padding: 0 60px;
-  position: relative;
+  padding: 0 48px;
+  border-top: 3px solid #e3c36b;
 }
 
 .footer-logo {
   color: white;
-  font-size: 28px;
-  font-weight: bold;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 1px;
 }

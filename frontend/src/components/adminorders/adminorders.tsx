@@ -13,13 +13,13 @@ const statusStyles: Record<string, React.CSSProperties> = {
 };
 
 export default function AdminOrders() {
-
   const [orders, setOrders] = useState<any[]>([]);
   const [search, setSearch] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
 
   useEffect(() => {
     fetchOrders();
-    }, []);
+  }, []);
 
   async function fetchOrders() {
     try {
@@ -89,69 +89,49 @@ export default function AdminOrders() {
             className="admin-order-card"
             style={statusStyles[order.status] ?? {}}
           >
-            <OneOrder
-              orderId={order.order_id}
-              createdAt={order.created_at}
-              status={order.status}
-              items={order.items}
-              total_price={order.total_price}
-              billingInfo={{
-                billing_name: order.billing_name,
-                billing_phone: order.billing_phone,
-                billing_country: order.billing_country,
-                billing_zip: order.billing_zip,
-                billing_city: order.billing_city,
-                billing_address: order.billing_address,
-              }}
-            />
-            <div className="admin-order-actions">
-              {order.status === "ordered" && (
-                <>
-                  <button
-                    onClick={() => updateOrderStatus(order.order_id, "shipped")}
-                  >
-                    Elfogad
-                  </button>
-                  <button
-                    onClick={() =>
-                      updateOrderStatus(order.order_id, "cancelled")
-                    }
-                  >
-                    Elutasít
-                  </button>
-                </>
-              )}
-              {order.status === "shipped" && (
-                <>
-                  <button
-                    onClick={() =>
-                      updateOrderStatus(order.order_id, "delivered")
-                    }
-                  >
-                    Kiszállítva
-                  </button>
-                  <button
-                    onClick={() =>
-                      updateOrderStatus(order.order_id, "cancelled")
-                    }
-                  >
-                    Visszavon
-                  </button>
-                </>
-              )}
-              {order.status === "delivered" && (
-                <span className="done">Kiszállítva</span>
-              )}
-              {order.status === "cancelled" && (
-                <span className="cancelled">Visszautasítva</span>
-              )}
+            <div className="admin-order-card-info">
+              <p className="admin-order-name">
+                {order.billing_name || order.username || "—"}
+              </p>
+              <p className="admin-order-date">{order.created_at}</p>
             </div>
+            <button
+              className="admin-order-view-btn"
+              onClick={() => setSelectedOrder(order)}
+            >
+              Megtekintés
+            </button>
           </div>
         ))}
         {filteredOrders.length === 0 && (
           <p className="admin-orders-empty">Nincs találat.</p>
         )}
       </div>
+
+      {selectedOrder && (
+        <OneOrder
+          orderId={selectedOrder.order_id}
+          createdAt={selectedOrder.created_at}
+          status={selectedOrder.status}
+          items={selectedOrder.items}
+          total_price={selectedOrder.total_price}
+          billingInfo={{
+            billing_name: selectedOrder.billing_name,
+            billing_phone: selectedOrder.billing_phone,
+            billing_country: selectedOrder.billing_country,
+            billing_zip: selectedOrder.billing_zip,
+            billing_city: selectedOrder.billing_city,
+            billing_address: selectedOrder.billing_address,
+          }}
+          isAdmin={true}
+          onClose={() => setSelectedOrder(null)}
+          onUpdateStatus={(id, status) => {
+            updateOrderStatus(id, status);
+            setSelectedOrder(null);
+          }}
+        />
+      )}
+
       <Footer />
     </>
   );
