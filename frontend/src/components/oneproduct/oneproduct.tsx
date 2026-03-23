@@ -6,6 +6,7 @@ import Header from "../header/Header";
 import Footer from "../footer/Footer";
 import Title from "../title/title";
 import EditItem from "../edititem/edititem";
+import LogIn from "../login/LogIn";
 
 interface Product {
   product_id: number;
@@ -25,6 +26,7 @@ const OneProduct = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [role, setRole] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -68,7 +70,7 @@ const OneProduct = () => {
   const handleAddToCart = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      navigate("/login");
+      setShowLogin(true);
       return;
     }
 
@@ -131,7 +133,11 @@ const OneProduct = () => {
               disabled={product.stock === 0}
               onClick={handleAddToCart}
             >
-              {product.stock > 0 ? "Kosárhoz adás" : "Elfogyott"}
+              {product.stock === 0
+                ? "Elfogyott"
+                : !localStorage.getItem("token")
+                ? "Jelentkezz be a vásárláshoz"
+                : "Kosárhoz adás"}
             </button>
 
             {role === "admin" && (
@@ -150,6 +156,17 @@ const OneProduct = () => {
           onUpdated={() => {
             setEditOpen(false);
             fetchProduct();
+          }}
+        />
+      )}
+
+      {showLogin && (
+        <LogIn
+          onClose={() => setShowLogin(false)}
+          onLoginSuccess={(user: any) => {
+            localStorage.setItem("user", JSON.stringify(user));
+            setShowLogin(false);
+            window.location.reload();
           }}
         />
       )}

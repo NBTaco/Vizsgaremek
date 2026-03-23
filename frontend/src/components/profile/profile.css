@@ -109,3 +109,39 @@
 .profile-order-view-btn:hover {
   background-color: #0d4a73;
 }
+
+@media (max-width: 768px) {
+  .profile-container {
+    flex-direction: column;
+    padding: 20px 16px 32px;
+    gap: 16px;
+  }
+  .profile-info {
+    flex: none;
+    width: 100%;
+    position: static;
+  }
+  .profile-orders {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-container {
+    padding: 14px 12px 24px;
+    gap: 12px;
+  }
+  .profile-info,
+  .profile-orders {
+    padding: 16px;
+  }
+  .profile-order-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .profile-order-view-btn {
+    width: 100%;
+    text-align: center;
+  }
+}

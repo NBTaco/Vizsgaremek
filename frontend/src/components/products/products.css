@@ -120,3 +120,65 @@
   grid-column: 1 / -1;
   padding: 24px 0;
 }
+
+@media (max-width: 768px) {
+  .search-bar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px 16px 0;
+    gap: 8px;
+  }
+  .search-bar input {
+    width: 100%;
+  }
+  .products-layout {
+    flex-direction: column;
+    padding: 16px 16px 32px;
+    gap: 16px;
+  }
+  .filters {
+    flex: none;
+    width: 100%;
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px 16px;
+  }
+  .filters p {
+    width: 100%;
+    margin: 0;
+    padding-bottom: 8px;
+  }
+  .filters select {
+    flex: 1 1 140px;
+  }
+  .filters button {
+    flex: 1 1 100px;
+  }
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-bar {
+    padding: 12px 12px 0;
+  }
+  .products-layout {
+    padding: 12px 12px 24px;
+  }
+  .filters {
+    padding: 12px;
+    gap: 8px;
+  }
+  .filters select,
+  .filters button {
+    flex: 1 1 100%;
+  }
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
+  }
+}

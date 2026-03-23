@@ -11,12 +11,16 @@ export default function AddItem({ onClose }: any) {
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
   const [image, setImage] = useState<File | null>(null);
-
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
-
   const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<{
+    productName?: string;
+    price?: string;
+    stock?: string;
+    image?: string;
+    server?: string;
+  }>({});
 
   const fetchCategories = async () => {
     try {
@@ -24,7 +28,7 @@ export default function AddItem({ onClose }: any) {
       const data = await res.json();
       setCategories(data);
     } catch {
-      setError("Kategóriák betöltése sikertelen");
+      setErrors((prev) => ({ ...prev, server: "Kategóriák betöltése sikertelen" }));
     }
   };
 
@@ -34,43 +38,55 @@ export default function AddItem({ onClose }: any) {
 
   const toggleCategory = (id: number) => {
     if (selectedCategories.includes(id)) {
-      setSelectedCategories(selectedCategories.filter(c => c !== id));
+      setSelectedCategories(selectedCategories.filter((c) => c !== id));
     } else {
       setSelectedCategories([...selectedCategories, id]);
     }
   };
 
-  const handleSubmit = async () => {
-    setError("");
-    setMessage("");
-
-    if (!productName || !price || !stock) {
-      setError("Minden mező kitöltése kötelező");
-      return;
+  const validate = () => {
+    const e: typeof errors = {};
+    if (!productName.trim()) {
+      e.productName = "A termék neve kötelező.";
+    } else if (productName.trim().length < 2) {
+      e.productName = "A termék neve legalább 2 karakter legyen.";
     }
-
+    if (!price) {
+      e.price = "Az ár megadása kötelező.";
+    } else if (isNaN(Number(price)) || Number(price) < 0) {
+      e.price = "Az ár érvénytelen (nem negatív szám).";
+    }
+    if (!stock) {
+      e.stock = "A készlet megadása kötelező.";
+    } else if (isNaN(Number(stock)) || Number(stock) < 0 || !Number.isInteger(Number(stock))) {
+      e.stock = "A készlet egész szám kell legyen, és nem lehet negatív.";
+    }
     if (!image) {
-      setError("Kép kiválasztása kötelező");
+      e.image = "Kép kiválasztása kötelező.";
+    }
+    return e;
+  };
+
+  const handleSubmit = async () => {
+    setMessage("");
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
+    setErrors({});
 
     try {
       const formData = new FormData();
-
       formData.append("product_name", productName);
       formData.append("price", price);
       formData.append("stock", stock);
-      formData.append("image", image);
-
-      selectedCategories.forEach(id =>
-        formData.append("category_ids", id.toString())
-      );
+      formData.append("image", image!);
+      selectedCategories.forEach((id) => formData.append("category_ids", id.toString()));
 
       const res = await fetch("http://localhost:3000/items", {
         method: "POST",
-        headers: {
-    "x-access-token": localStorage.getItem("token") || "",  
-  },
+        headers: { "x-access-token": localStorage.getItem("token") || "" },
         body: formData,
       });
 
@@ -78,50 +94,53 @@ export default function AddItem({ onClose }: any) {
 
       if (data.success) {
         setMessage("Termék sikeresen hozzáadva");
-
         setProductName("");
         setPrice("");
         setStock("");
         setImage(null);
         setSelectedCategories([]);
       } else {
-        setError(data.message);
+        setErrors({ server: data.message });
       }
     } catch {
-      setError("Szerver hiba");
+      setErrors({ server: "Szerver hiba" });
     }
   };
+
+  const clearError = (field: keyof typeof errors) =>
+    setErrors((prev) => ({ ...prev, [field]: undefined }));
 
   return (
     <div className="additem-modal">
       <div className="additem-box">
-
         <div className="additem-header">
           <span>Termék hozzáadása</span>
           <button className="additem-close" onClick={onClose}>×</button>
         </div>
 
         <div className="additem-content">
-
           <label>Termék neve</label>
           <input
             value={productName}
-            onChange={(e) => setProductName(e.target.value)}
+            onChange={(e) => { setProductName(e.target.value); clearError("productName"); }}
           />
+          {errors.productName && <span className="field-error">{errors.productName}</span>}
 
           <label>Ár</label>
           <input
             type="number"
             value={price}
-            onChange={(e) => setPrice(e.target.value)}
+            onChange={(e) => { setPrice(e.target.value); clearError("price"); }}
           />
+          {errors.price && <span className="field-error">{errors.price}</span>}
 
           <label>Készlet</label>
           <input
             type="number"
             value={stock}
-            onChange={(e) => setStock(e.target.value)}
+            onChange={(e) => { setStock(e.target.value); clearError("stock"); }}
           />
+          {errors.stock && <span className="field-error">{errors.stock}</span>}
 
           <label>Kép</label>
           <input
@@ -129,13 +148,14 @@ export default function AddItem({ onClose }: any) {
             accept="image/*"
             onChange={(e) => {
               if (e.target.files) setImage(e.target.files[0]);
+              clearError("image");
             }}
           />
+          {errors.image && <span className="field-error">{errors.image}</span>}
 
           <label>Kategóriák</label>
-
           <div className="category-pills">
-            {categories.map(cat => {
+            {categories.map((cat) => {
               const isSelected = selectedCategories.includes(cat.category_id);
               return (
                 <button
@@ -154,15 +174,13 @@ export default function AddItem({ onClose }: any) {
             )}
           </div>
 
-          {error && <div className="error-text">{error}</div>}
+          {errors.server && <span className="field-error">{errors.server}</span>}
           {message && <div className="success-text">{message}</div>}
 
           <button className="additem-btn" onClick={handleSubmit}>
             Termék hozzáadása
           </button>
-
         </div>
-
       </div>
     </div>
   );

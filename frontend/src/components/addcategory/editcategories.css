@@ -157,3 +157,40 @@
 .delete-btn:hover {
   background-color: #dc2626;
 }
+
+@media (max-width: 480px) {
+  .addcategory-box {
+    width: calc(100vw - 32px);
+    padding: 20px 16px;
+    max-height: 95vh;
+  }
+}
+
+.delete-inline-confirm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.delete-confirm-text {
+  font-size: 0.82rem;
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.cancel-small-btn {
+  background: #f3f4f6;
+  border: 1.5px solid #d1d5db;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #374151;
+  transition: background 0.2s;
+}
+
+.cancel-small-btn:hover {
+  background: #e5e7eb;
+}

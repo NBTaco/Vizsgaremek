@@ -156,3 +156,19 @@
   font-size: 0.82rem;
   font-weight: 600;
 }
+
+@media (max-width: 480px) {
+  .additem-box {
+    width: calc(100vw - 32px);
+    padding: 20px 16px;
+    max-height: 95vh;
+  }
+}
+
+.field-error {
+  display: block;
+  color: #ef4444;
+  font-size: 0.8rem;
+  margin-top: -4px;
+  margin-bottom: 2px;
+}

@@ -16,14 +16,12 @@ function Header({ user }: any) {
   const navigate = useNavigate();
 
   useEffect(() => {
-  const storedUser = localStorage.getItem("user");
-  
-  if (storedUser) {
-    setloggedInUser(JSON.parse(storedUser));
-  }
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setloggedInUser(JSON.parse(storedUser));
+    }
 
-  const token = localStorage.getItem("token");
-
+    const token = localStorage.getItem("token");
     if (!token) {
       setRole(null);
       return;
@@ -36,9 +34,8 @@ function Header({ user }: any) {
       console.error("Invalid token", err);
       setRole(null);
     }
-    
-}, []);
-  
+  }, []);
+
   const handleLoginSuccess = (user: any) => {
     setloggedInUser(user);
     localStorage.setItem("user", JSON.stringify(user));
@@ -52,7 +49,7 @@ function Header({ user }: any) {
     localStorage.removeItem("username");
     localStorage.removeItem("token");
     localStorage.removeItem("orderId");
-      navigate("/");
+    navigate("/");
   };
 
   const handleRegistrationSuccess = (user: any) => {
@@ -69,16 +66,15 @@ function Header({ user }: any) {
         <Link to="/">Főoldal</Link>
         <Link to="/products">Termékek</Link>
         <Link to="/aboutus">Rólunk</Link>
-        {role ==  "admin" && (
+        {role === "admin" && (
           <Link to="/adminorder">Rendelések kezelése (Admin)</Link>
         )}
       </nav>
 
       <div className="menu-container">
-
         {loggedInUser && (
           <button className="cart-btn" onClick={() => navigate("/cart")}>
-            <span >🛒</span>
+            <span>🛒</span>
           </button>
         )}
 
@@ -88,19 +84,30 @@ function Header({ user }: any) {
 
         {open && (
           <div className="dropdown">
+            <a className="dropdown-nav-link" onClick={() => { navigate("/"); setOpen(false); }}>Főoldal</a>
+            <a className="dropdown-nav-link" onClick={() => { navigate("/products"); setOpen(false); }}>Termékek</a>
+            <a className="dropdown-nav-link" onClick={() => { navigate("/aboutus"); setOpen(false); }}>Rólunk</a>
+            {role === "admin" && (
+              <a className="dropdown-nav-link" onClick={() => { navigate("/adminorder"); setOpen(false); }}>
+                Rendelések (Admin)
+              </a>
+            )}
+            <div className="dropdown-divider" />
+
             {loggedInUser && (
               <>
-                <a onClick={() => navigate("/profile")}>Profil ({loggedInUser.username})</a>
+                <a onClick={() => { navigate("/profile"); setOpen(false); }}>
+                  Profil ({loggedInUser.username})
+                </a>
                 <a href="#" onClick={handleLogout}>Kijelentkezés</a>
               </>
             )}
             {!loggedInUser && (
               <>
-                <a href="#" onClick={() => setShowLogin(true)}>Bejelentkezés</a>
-                <a href="#" onClick={() => setShowRegistration(true)}>Regisztráció</a>
+                <a href="#" onClick={() => { setShowLogin(true); setOpen(false); }}>Bejelentkezés</a>
+                <a href="#" onClick={() => { setShowRegistration(true); setOpen(false); }}>Regisztráció</a>
               </>
             )}
-            <a href="#">Beállítások</a>
           </div>
         )}
       </div>

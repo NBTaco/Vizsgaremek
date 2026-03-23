@@ -32,15 +32,17 @@ export default function EditItem({ product, onClose, onUpdated, onDeleted }: Pro
   const [productName, setProductName] = useState(product.product_name);
   const [price, setPrice] = useState(String(product.price));
   const [stock, setStock] = useState(String(product.stock));
-
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategories, setSelectedCategories] = useState<number[]>(
-    product.category_ids ?? []
-  );
-
+  const [selectedCategories, setSelectedCategories] = useState<number[]>(product.category_ids ?? []);
   const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<{
+    productName?: string;
+    price?: string;
+    stock?: string;
+    server?: string;
+  }>({});
   const [deleting, setDeleting] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -49,7 +51,7 @@ export default function EditItem({ product, onClose, onUpdated, onDeleted }: Pro
         const data = await res.json();
         setCategories(data);
       } catch {
-        setError("Kategóriák betöltése sikertelen");
+        setErrors((prev) => ({ ...prev, server: "Kategóriák betöltése sikertelen" }));
       }
     };
     fetchCategories();
@@ -63,45 +65,49 @@ export default function EditItem({ product, onClose, onUpdated, onDeleted }: Pro
     }
   };
 
+  const validate = () => {
+    const e: typeof errors = {};
+    if (!productName.trim()) {
+      e.productName = "A termék neve nem lehet üres.";
+    } else if (productName.trim().length < 2) {
+      e.productName = "A termék neve legalább 2 karakter legyen.";
+    }
+    const parsedPrice = Number(price);
+    if (price === "" || isNaN(parsedPrice)) {
+      e.price = "Az ár megadása kötelező.";
+    } else if (parsedPrice < 0) {
+      e.price = "Az ár nem lehet negatív.";
+    }
+    const parsedStock = Number(stock);
+    if (stock === "" || isNaN(parsedStock)) {
+      e.stock = "A készlet megadása kötelező.";
+    } else if (parsedStock < 0) {
+      e.stock = "A készlet nem lehet negatív.";
+    } else if (!Number.isInteger(parsedStock)) {
+      e.stock = "A készlet csak egész szám lehet.";
+    }
+    return e;
+  };
+
+  const clearError = (field: keyof typeof errors) =>
+    setErrors((prev) => ({ ...prev, [field]: undefined }));
+
   const handleSubmit = async () => {
-    setError("");
     setMessage("");
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+    setErrors({});
 
     const parsedPrice = Number(price);
     const parsedStock = Number(stock);
 
-    if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
-      setError("Az ár nem lehet negatív szám");
-      return;
-    }
-
-    if (!Number.isFinite(parsedStock) || parsedStock < 0) {
-      setError("A készlet nem lehet negatív szám");
-      return;
-    }
-
-    const payload: UpdatePayload = {
-      category_ids: selectedCategories,
-    };
-
-    if (productName.trim() !== product.product_name) {
-      payload.product_name = productName.trim();
-    }
-    if (parsedPrice !== product.price) {
-      payload.price = parsedPrice;
-    }
-    if (parsedStock !== product.stock) {
-      payload.stock = parsedStock;
-    }
-
-    if (payload.product_name === undefined && payload.price === undefined && payload.stock === undefined && payload.category_ids.length > 0) {
-      const original = [...(product.category_ids ?? [])].sort((a, b) => a - b);
-      const updated = [...selectedCategories].sort((a, b) => a - b);
-      if (JSON.stringify(original) === JSON.stringify(updated)) {
-        setError("Nincs módosítás");
-        return;
-      }
-    }
+    const payload: UpdatePayload = { category_ids: selectedCategories };
+    if (productName.trim() !== product.product_name) payload.product_name = productName.trim();
+    if (parsedPrice !== product.price) payload.price = parsedPrice;
+    if (parsedStock !== product.stock) payload.stock = parsedStock;
 
     try {
       const token = localStorage.getItem("token");
@@ -120,26 +126,22 @@ export default function EditItem({ product, onClose, onUpdated, onDeleted }: Pro
         setMessage("Termék sikeresen frissítve");
         onUpdated?.();
       } else {
-        setError(data.message || "Ismeretlen hiba");
+        setErrors({ server: data.message || "Ismeretlen hiba" });
       }
     } catch {
-      setError("Szerver hiba");
+      setErrors({ server: "Szerver hiba" });
     }
   };
 
   const handleDelete = async () => {
-    if (!window.confirm(`Biztosan törlöd a(z) "${product.product_name}" terméket? Ez a művelet nem visszavonható.`)) return;
-
     setDeleting(true);
-    setError("");
+    setErrors({});
 
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(`http://localhost:3000/items/${product.product_id}`, {
         method: "DELETE",
-        headers: {
-          "x-access-token": token || "",
-        },
+        headers: { "x-access-token": token || "" },
       });
 
       const data = await res.json();
@@ -148,12 +150,14 @@ export default function EditItem({ product, onClose, onUpdated, onDeleted }: Pro
         onDeleted?.();
         onClose();
       } else {
-        setError(data.message || "Nem sikerült törölni a terméket");
+        setErrors({ server: data.message || "Nem sikerült törölni a terméket" });
         setDeleting(false);
+        setDeleteConfirm(false);
       }
     } catch {
-      setError("Szerver hiba – nem sikerült törölni");
+      setErrors({ server: "Szerver hiba – nem sikerült törölni" });
       setDeleting(false);
+      setDeleteConfirm(false);
     }
   };
 
@@ -162,31 +166,32 @@ export default function EditItem({ product, onClose, onUpdated, onDeleted }: Pro
       <div className="edititem-box">
         <div className="edititem-header">
           <span>Termék szerkesztése</span>
-          <button className="edititem-close" onClick={onClose}>
-            ×
-          </button>
+          <button className="edititem-close" onClick={onClose}>×</button>
         </div>
 
         <div className="edititem-content">
           <label>Termék neve</label>
           <input
             value={productName}
-            onChange={(e) => setProductName(e.target.value)}
+            onChange={(e) => { setProductName(e.target.value); clearError("productName"); }}
           />
+          {errors.productName && <span className="field-error">{errors.productName}</span>}
 
           <label>Ár</label>
           <input
             type="number"
             value={price}
-            onChange={(e) => setPrice(e.target.value)}
+            onChange={(e) => { setPrice(e.target.value); clearError("price"); }}
           />
+          {errors.price && <span className="field-error">{errors.price}</span>}
 
           <label>Készlet</label>
           <input
             type="number"
             value={stock}
-            onChange={(e) => setStock(e.target.value)}
+            onChange={(e) => { setStock(e.target.value); clearError("stock"); }}
           />
+          {errors.stock && <span className="field-error">{errors.stock}</span>}
 
           <label>Kategóriák</label>
           <div className="category-pills">
@@ -209,22 +214,32 @@ export default function EditItem({ product, onClose, onUpdated, onDeleted }: Pro
             )}
           </div>
 
-          {error && <div className="error-text">{error}</div>}
+          {errors.server && <span className="field-error">{errors.server}</span>}
           {message && <div className="success-text">{message}</div>}
 
-          <button className="edititem-btn" onClick={handleSubmit}>
-            Mentés
-          </button>
+          <button className="edititem-btn" onClick={handleSubmit}>Mentés</button>
 
           <div className="edititem-divider" />
 
-          <button
-            className="edititem-delete-btn"
-            onClick={handleDelete}
-            disabled={deleting}
-          >
-            {deleting ? "Törlés folyamatban..." : "Termék törlése"}
-          </button>
+          {!deleteConfirm ? (
+            <button
+              className="edititem-delete-btn"
+              onClick={() => setDeleteConfirm(true)}
+              disabled={deleting}
+            >
+              Termék törlése
+            </button>
+          ) : (
+            <div className="delete-confirm-box">
+              <span className="field-error">Biztosan törlöd a terméket? Ez nem visszavonható.</span>
+              <div className="delete-confirm-actions">
+                <button className="edititem-delete-btn" onClick={handleDelete} disabled={deleting}>
+                  {deleting ? "Törlés..." : "Igen, törlöm"}
+                </button>
+                <button className="edititem-btn" onClick={() => setDeleteConfirm(false)}>Mégse</button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -127,3 +127,42 @@
 .add-to-cart-btn:hover {
   background-color: #0d4a73;
 }
+
+/* ── Tablet ── */
+@media (max-width: 768px) {
+  .product-page-container {
+    padding: 20px 16px 32px;
+  }
+  .product-image-section {
+    width: 100%;
+    max-width: 100%;
+    height: 340px;
+  }
+  .product-details-section {
+    width: 100%;
+  }
+  .product-main-content {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-page-container {
+    padding: 14px 12px 24px;
+  }
+  .product-image-section {
+    height: 260px;
+    padding: 10px;
+  }
+  .product-details-section {
+    width: 100%;
+    gap: 12px;
+  }
+  .price-tag {
+    font-size: 1.3rem;
+  }
+  .add-to-cart-btn {
+    padding: 12px;
+    font-size: 0.95rem;
+  }
+}

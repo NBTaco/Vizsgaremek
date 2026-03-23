@@ -98,3 +98,33 @@
   padding: 32px;
   text-align: center;
 }
+
+@media (max-width: 768px) {
+  .admin-orders-search {
+    padding: 16px 16px 0;
+  }
+  .admin-orders-container {
+    padding: 16px 16px 32px;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-orders-search {
+    padding: 12px 12px 0;
+  }
+  .admin-orders-container {
+    padding: 12px 12px 24px;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .admin-order-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .admin-order-view-btn {
+    width: 100%;
+    text-align: center;
+  }
+}

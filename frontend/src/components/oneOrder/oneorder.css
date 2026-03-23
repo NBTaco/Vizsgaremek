@@ -145,3 +145,18 @@
   background-color: #fee2e2;
   border-radius: 8px;
 }
+
+@media (max-width: 480px) {
+  .one-order-modal {
+    padding: 1.25rem;
+    max-height: 92vh;
+  }
+  .one-order-actions {
+    flex-direction: column;
+  }
+  .btn-accept,
+  .btn-reject {
+    width: 100%;
+    text-align: center;
+  }
+}

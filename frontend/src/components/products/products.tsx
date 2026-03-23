@@ -3,6 +3,7 @@ import Footer from "../footer/Footer";
 import Title from "../title/title";
 import Product from "../product/product";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import EditCategories from "../addcategory/editcategories";
 import "./products.css";
@@ -14,17 +15,32 @@ export default function Products() {
   const [role, setRole] = useState<string | null>(null);
   const [showEditCategories, setShowEditCategories] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
   const [showAddItem, setShowAddItem] = useState(false);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedCategory, setSelectedCategory] = useState(
+    searchParams.get("category") ?? ""
+  );
+
+  useEffect(() => {
+    setSelectedCategory(searchParams.get("category") ?? "");
+  }, [searchParams]);
+
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value);
+    if (value) {
+      setSearchParams({ category: value });
+    } else {
+      setSearchParams({});
+    }
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-
     if (!token) {
       setRole(null);
       return;
     }
-
     try {
       const decoded = jwtDecode<{ role?: string }>(token);
       setRole(decoded?.role ?? null);
@@ -62,17 +78,16 @@ export default function Products() {
   }, []);
 
   const filteredProducts = products.filter((p: any) => {
-  const matchesSearch =
-    p.product_name
+    const matchesSearch = p.product_name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
 
-  const matchesCategory =
-    selectedCategory === "" ||
-    p.category_names.includes(selectedCategory);
+    const matchesCategory =
+      selectedCategory === "" ||
+      p.category_names.includes(selectedCategory);
 
-  return matchesSearch && matchesCategory;
-});
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <>
@@ -90,15 +105,18 @@ export default function Products() {
       <div className="products-layout">
         <div className="filters">
           <p>Szűrés</p>
-          <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
+          <select
+            value={selectedCategory}
+            onChange={(e) => handleCategoryChange(e.target.value)}
+          >
             <option value="">Kategóriák</option>
-              {categories.map((e: any) => (
-            <option key={e.category_id} value={e.name}>{e.name}</option>
+            {categories.map((e: any) => (
+              <option key={e.category_id} value={e.name}>{e.name}</option>
             ))}
           </select>
           {role === "admin" && (
             <div>
-              <button onClick={() => setShowEditCategories(true)}>Kategóriák szerkesztése</button>
+              <button onClick={() => setShowEditCategories(true)}>Kategória kezelése</button>
               <button onClick={() => setShowAddItem(true)}>Termék hozzáadása</button>
             </div>
           )}
@@ -131,8 +149,8 @@ export default function Products() {
         <AddItem
           onClose={() => {
             setShowAddItem(false);
-        }}
-      />
+          }}
+        />
       )}
       <Footer />
     </>

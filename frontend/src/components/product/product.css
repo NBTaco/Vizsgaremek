@@ -76,3 +76,15 @@
 .watch-button button:hover {
   background-color: #0d4a73;
 }
+
+@media (max-width: 480px) {
+  .product-image {
+    height: 160px;
+  }
+  .product-name {
+    font-size: 0.88rem;
+  }
+  .product-price {
+    font-size: 1rem;
+  }
+}

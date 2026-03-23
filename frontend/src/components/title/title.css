@@ -12,3 +12,12 @@
   letter-spacing: 1px;
   margin: 0;
 }
+
+@media (max-width: 480px) {
+  .title h1 {
+    font-size: 1.25rem;
+  }
+  .title {
+    padding: 10px 0;
+  }
+}

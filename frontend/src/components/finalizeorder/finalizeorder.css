@@ -71,3 +71,25 @@
 .finalize-form button:hover {
   background-color: #0d4a73;
 }
+
+
+@media (max-width: 480px) {
+  .finalize-order {
+    padding: 20px 12px 40px;
+  }
+  .finalize-form {
+    padding: 20px 16px;
+  }
+  .finalize-form h2 {
+    font-size: 1.15rem;
+    margin-bottom: 20px;
+  }
+}
+
+.field-error {
+  display: block;
+  color: #ef4444;
+  font-size: 0.8rem;
+  margin-top: -12px;
+  margin-bottom: 6px;
+}
