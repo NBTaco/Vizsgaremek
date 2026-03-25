@@ -38,17 +38,28 @@ export const updateCartItem = async (req: any, res: Response): Promise<void> => 
 
     const orderId = orders[0].order_id;
 
-    const [priceRow]: any = await connection.query(
-      "SELECT price FROM products WHERE product_id = ?",
+    const [productRow]: any = await connection.query(
+      "SELECT price, stock FROM products WHERE product_id = ?",
       [parsedProductId]
     );
 
-    if (priceRow.length === 0) {
+    if (productRow.length === 0) {
       res.status(404).json({ success: false, message: "Product not found" });
       return;
     }
 
-    const newSubtotal = priceRow[0].price * parsedQuantity;
+    const { price, stock } = productRow[0];
+
+    if (parsedQuantity > stock) {
+      res.status(400).json({
+        success: false,
+        message: `Only ${stock} pcs available in stock`,
+        availableStock: stock,
+      });
+      return;
+    }
+
+    const newSubtotal = price * parsedQuantity;
 
     const [result] = await connection.query(
       "UPDATE order_items SET quantity = ?, subtotal = ? WHERE order_id = ? AND product_id = ?",

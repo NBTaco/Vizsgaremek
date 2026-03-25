@@ -27,22 +27,61 @@ export const addToCart = async (req: any, res: Response): Promise<void> => {
       return;
     }
 
-    const [productRow]: any = await connection.query("SELECT price FROM products WHERE product_id = ?", [parsedProductId]);
+    const [productRow]: any = await connection.query(
+      "SELECT price, stock FROM products WHERE product_id = ?",
+      [parsedProductId]
+    );
+
     if (productRow.length === 0) {
-      res.status(404).json({ success: false, message: "Termék nem található" });
+      res.status(404).json({ success: false, message: "Product not found" });
       return;
     }
-    const price = productRow[0].price;
-    const subtotal = price * parsedQuantity;
+
+    const { price, stock } = productRow[0];
+
     const [orders]: any = await connection.query(
       "SELECT order_id FROM orders WHERE user_id = ? AND status = 'in_progress' LIMIT 1",
       [userId]
     );
 
-    let orderId;
+    let orderId: number | null = null;
+    let alreadyInCart = 0;
+
     if (orders.length > 0) {
       orderId = orders[0].order_id;
-    } else {
+      const [cartRow]: any = await connection.query(
+        "SELECT quantity FROM order_items WHERE order_id = ? AND product_id = ?",
+        [orderId, parsedProductId]
+      );
+      if (cartRow.length > 0) {
+        alreadyInCart = cartRow[0].quantity;
+      }
+    }
+
+    const totalRequested = alreadyInCart + parsedQuantity;
+
+    if (totalRequested > stock) {
+      const canAdd = stock - alreadyInCart;
+
+      if (canAdd <= 0) {
+        res.status(400).json({
+          success: false,
+          message: `This product is already at the maximum quantity in the cart (${stock} pcs)`,
+          availableStock: stock,
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: `Only ${canAdd} more item(s) can be added to the cart (stock: ${stock} pcs)`,
+          availableStock: canAdd,
+        });
+      }
+      return;
+    }
+
+    const subtotal = price * parsedQuantity;
+
+    if (orderId === null) {
       const [newOrder]: any = await connection.query(
         `INSERT INTO orders (user_id, status, total_price, created_at,
          billing_name, billing_phone, billing_country, billing_zip, billing_city, billing_address)
@@ -68,7 +107,7 @@ export const addToCart = async (req: any, res: Response): Promise<void> => {
       [orderId, orderId]
     );
 
-    res.json({ success: true, message: "A kosár frissítve!" });
+    res.json({ success: true, message: "Cart updated successfully!" });
   } catch (error: any) {
     console.error(error);
     res.status(500).json({ success: false, error: error.message });

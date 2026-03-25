@@ -51,6 +51,11 @@ export const placeOrder = async (req: any, res: Response): Promise<void> => {
       return;
     }
 
+    const [orderItems]: any = await connection.query(
+      "SELECT product_id, quantity FROM order_items WHERE order_id = ?",
+      [parsedOrderId]
+    );
+
     await connection.query(
       `UPDATE orders SET status = 'ordered',
         billing_name = ?, billing_phone = ?, billing_country = ?,
@@ -60,6 +65,13 @@ export const placeOrder = async (req: any, res: Response): Promise<void> => {
        billing_zip.trim(), billing_city.trim(), billing_address.trim(),
        parsedOrderId, userId]
     );
+
+    for (const item of orderItems) {
+      await connection.query(
+        "UPDATE products SET stock = GREATEST(0, stock - ?) WHERE product_id = ?",
+        [item.quantity, item.product_id]
+      );
+    }
 
     res.json({ success: true, message: "Order placed successfully" });
   } catch (error: any) {

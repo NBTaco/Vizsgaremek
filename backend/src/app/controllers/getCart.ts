@@ -28,7 +28,7 @@ export const getCart = async (req: any, res: Response): Promise<void> => {
     const orderId = orders[0].order_id;
 
     const [items]: any = await connection.query(
-      `SELECT p.product_id, p.product_name, p.price, p.description, p.image_url, oi.quantity 
+      `SELECT p.product_id, p.product_name, p.price, p.description, p.image_url, p.stock, oi.quantity 
        FROM order_items oi 
        JOIN products p ON oi.product_id = p.product_id 
        WHERE oi.order_id = ?`,

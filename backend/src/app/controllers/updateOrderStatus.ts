@@ -42,6 +42,33 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
       }
     }
 
+    if (trimmedStatus === "cancelled") {
+      const [currentOrder]: any = await connection.query(
+        "SELECT status FROM orders WHERE order_id = ?",
+        [parsedOrderId]
+      );
+
+      if (currentOrder.length === 0) {
+        res.status(404).json({ success: false, message: "Order not found" });
+        return;
+      }
+      const previousStatus = currentOrder[0].status;
+
+      if (previousStatus !== "cancelled" && previousStatus !== "in_progress") {
+        const [orderItems]: any = await connection.query(
+          "SELECT product_id, quantity FROM order_items WHERE order_id = ?",
+          [parsedOrderId]
+        );
+
+        for (const item of orderItems) {
+          await connection.query(
+            "UPDATE products SET stock = stock + ? WHERE product_id = ?",
+            [item.quantity, item.product_id]
+          );
+        }
+      }
+    }
+
     let query = "UPDATE orders SET status = ?";
     const params: any[] = [trimmedStatus];
 
