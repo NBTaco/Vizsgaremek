@@ -39,5 +39,8 @@
     "./bin/*",
     "./lib/*"
   ],
-  "typings": "./lib/index.d.ts"
+  "typings": "./lib/index.d.ts",
+  "devDependencies": {
+    "cypress": "^15.13.0"
+  }
 }

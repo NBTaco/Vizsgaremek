@@ -50,6 +50,7 @@ function Header({ user }: any) {
     localStorage.removeItem("token");
     localStorage.removeItem("orderId");
     navigate("/");
+    window.location.reload();
   };
 
   const handleRegistrationSuccess = (user: any) => {
