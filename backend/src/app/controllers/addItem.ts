@@ -8,7 +8,7 @@ export const addItem = async (req: Request, res: Response): Promise<void> => {
   let connection: mysql.Connection | null = null;
   try {
     connection = await mysql.createConnection(config.database);
-    const { product_name, price, stock, category_ids } = req.body;
+    const { product_name, description, price, stock, category_ids } = req.body;
     const file = req.file;
 
     if (!product_name || price === undefined || stock === undefined || !file) {
@@ -63,8 +63,8 @@ export const addItem = async (req: Request, res: Response): Promise<void> => {
     await connection.beginTransaction();
 
     const [result] = await connection.query(
-      "INSERT INTO products (product_name, price, stock, image_url) VALUES (?, ?, ?, ?)",
-      [product_name.trim(), parsedPrice, parsedStock, ""]
+      "INSERT INTO products (product_name, description, price, stock, image_url) VALUES (?, ?, ?, ?, ?)",
+      [product_name.trim(), (description || "").trim(), parsedPrice, parsedStock, ""]
     );
 
     const productId = (result as any).insertId;

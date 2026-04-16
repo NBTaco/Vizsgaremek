@@ -8,6 +8,7 @@ type Category = {
 
 export default function AddItem({ onClose }: any) {
   const [productName, setProductName] = useState("");
+  const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
   const [image, setImage] = useState<File | null>(null);
@@ -16,6 +17,7 @@ export default function AddItem({ onClose }: any) {
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState<{
     productName?: string;
+    description?: string;
     price?: string;
     stock?: string;
     image?: string;
@@ -51,6 +53,11 @@ export default function AddItem({ onClose }: any) {
     } else if (productName.trim().length < 2) {
       e.productName = "A termék neve legalább 2 karakter legyen.";
     }
+    if (!description.trim()) {
+      e.description = "A leírás megadása kötelező.";
+    } else if (description.trim().length < 5) {
+      e.description = "A leírás legalább 5 karakter legyen.";
+    }
     if (!price) {
       e.price = "Az ár megadása kötelező.";
     } else if (isNaN(Number(price)) || Number(price) < 0) {
@@ -79,6 +86,7 @@ export default function AddItem({ onClose }: any) {
     try {
       const formData = new FormData();
       formData.append("product_name", productName);
+      formData.append("description", description);
       formData.append("price", price);
       formData.append("stock", stock);
       formData.append("image", image!);
@@ -95,6 +103,7 @@ export default function AddItem({ onClose }: any) {
       if (data.success) {
         setMessage("Termék sikeresen hozzáadva");
         setProductName("");
+        setDescription("");
         setPrice("");
         setStock("");
         setImage(null);
@@ -126,6 +135,14 @@ export default function AddItem({ onClose }: any) {
           />
           {errors.productName && <span className="field-error">{errors.productName}</span>}
 
+          <label>Leírás</label>
+          <textarea
+            value={description}
+            rows={4}
+            onChange={(e) => { setDescription(e.target.value); clearError("description"); }}
+          />
+          {errors.description && <span className="field-error">{errors.description}</span>}
+          
           <label>Ár</label>
           <input
             type="number"

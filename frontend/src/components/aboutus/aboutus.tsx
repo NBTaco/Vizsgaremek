@@ -1,6 +1,7 @@
 import Footer from "../footer/Footer";
 import Header from "../header/Header";
 import Title from "../title/title";
+import rolunk from "./rolunk.png"
 import "./aboutus.css";
 
 export default function Aboutus() {
@@ -11,7 +12,7 @@ export default function Aboutus() {
       <div className="aboutus-card">
         <div className="top">
           <div className="image-container">
-            <img src="/wolf.png" alt="Wolf" />
+            <img src={rolunk} alt="rolunk" />
           </div>
 
           <div className="side-content">
@@ -30,7 +31,7 @@ export default function Aboutus() {
         <div className="bottom">
           <strong>Namero 1. – Barkács és Világítástechnika</strong><br/><br/>
           
-          Küldetésünk egy gyors, biztonságos és felhasználóbarát webshop létrehozása a barkácsolás és világítástechnika szerelmeseinek. Modern technológiákra (HTML, CSS, TypeScript, SQL, Node.js) építkezve garantáljuk a megbízható működést és az adatbiztonságot.<br/><br/>
+          Küldetésünk egy gyors, biztonságos webshop a barkácsolás és világítástechnika szerelmeseinek. Modern technológiákra építkezve garantáljuk a megbízható működést és az adatbiztonságot.<br/><br/>
           
           <strong>Miért mi?</strong><br/>
           • Átlátható termékkatalógus keresővel és szűrőkkel<br/>
